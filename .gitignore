@@ -1,0 +1,4 @@
+build/
+mcskinviewer.*
+romfs/gfx/
+.vscode
