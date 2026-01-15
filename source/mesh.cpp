@@ -9,6 +9,13 @@
 #include "mesh.hpp"
 #include "utils.hpp"
 
+Mesh::Mesh() {
+    AttrInfo_Init(&attrInfo);
+    AttrInfo_AddLoader(&attrInfo, 0, GPU_FLOAT, 3); // pos
+    // AttrInfo_AddLoader(&attrInfo, 1, GPU_FLOAT, 3); // normal
+    AttrInfo_AddLoader(&attrInfo, 1, GPU_FLOAT, 2); // uv
+}
+
 Mesh::Mesh(const std::string& obj) {
     AttrInfo_Init(&attrInfo);
     AttrInfo_AddLoader(&attrInfo, 0, GPU_FLOAT, 3); // pos
@@ -127,5 +134,6 @@ void Mesh::loadOBJ(const std::string& obj) {
 void Mesh::render() {
     C3D_SetBufInfo(&bufInfo);
     C3D_SetAttrInfo(&attrInfo);
-    C3D_DrawArrays(GPU_TRIANGLES, 0, meshSize);
+    // C3D_DrawArrays(GPU_TRIANGLES, 0, meshSize);
+    C3D_DrawElements(GPU_TRIANGLES, indexCount, C3D_UNSIGNED_SHORT, indices);
 }

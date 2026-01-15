@@ -55,7 +55,7 @@ CFLAGS	:=	-g -Wall -O2 -mword-relocations \
 			-ffunction-sections \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -D__3DS__
+CFLAGS	+=	$(INCLUDE) -D__3DS__ -DTINYGLTF_USE_CPP14
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++23
 
