@@ -1,10 +1,13 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <array>
 #include <vector>
 #include <3ds.h>
 #include <citro3d.h>
 #include <curl/curl.h>
+
+#include "glbloader.hpp"
 
 enum skinType{
     SKIN_CLASSIC = 0,
@@ -35,8 +38,10 @@ class Skin {
 public:
     Skin();
     ~Skin();
+    static void initModels();
     void download(const std::string& p_name);
     void use();
+    void render();
     C3D_Tex skin;
     std::vector<u8> skinPNG;
     std::vector<u8> skinData;
@@ -45,5 +50,9 @@ public:
     u16 visibility = FULL_SKIN;
     std::string name;
 private:
-
+    static std::array<Mesh, 6> ogSkin;
+    static std::array<Mesh, 6> slim1;
+    static std::array<Mesh, 6> slim2;
+    static std::array<Mesh, 6> wide1;
+    static std::array<Mesh, 6> wide2;
 };

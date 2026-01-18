@@ -25,8 +25,11 @@ Mesh::Mesh(const std::string& obj) {
 }
 
 Mesh::~Mesh() {
+    std::cout << "destruct\n";
     linearFree(meshData);
     meshData = nullptr;
+    linearFree(indices);
+    indices = nullptr;
 }
 
 void Mesh::loadOBJ(const std::string& obj) {

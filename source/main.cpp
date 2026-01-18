@@ -151,13 +151,8 @@ int main(int argc, char* argv[]) {
     Transform testTransform (v3f(0,0,-4), v3f(0.f, 0.f, 0.f), v3f(1.f));
 
     Skin skinStr;
+    skinStr.initModels();
     skinStr.download("Bob_Gangster");
-
-    auto ogSkin = loadSkinGLB("romfs:/ogskin.glb");
-    auto slim1 = loadSkinGLB("romfs:/slim1.glb");
-    auto slim2 = loadSkinGLB("romfs:/slim2.glb");
-    auto wide1 = loadSkinGLB("romfs:/wide1.glb");
-    auto wide2 = loadSkinGLB("romfs:/wide2.glb");
 
     while (aptMainLoop())
     {
@@ -189,15 +184,7 @@ int main(int argc, char* argv[]) {
         shader.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
         shader.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
         shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &testTransformMTX);
-        if(skinStr.type == SKIN_SLIM) {
-            for(Mesh& m : slim1) { m.render(); }
-            for(Mesh& m : slim2) { m.render(); }
-        } else if (skinStr.type == SKIN_WIDE) {
-            for(Mesh& m : wide1) { m.render(); }
-            for(Mesh& m : wide2) { m.render(); }
-        } else {
-            for(Mesh& m : ogSkin) { m.render(); }
-        }
+        skinStr.render();
 
         C3D_FrameEnd(0);
     }

@@ -8,6 +8,12 @@
 
 #include "skin.hpp"
 
+std::array<Mesh, 6> Skin::ogSkin;
+std::array<Mesh, 6> Skin::slim1;
+std::array<Mesh, 6> Skin::slim2;
+std::array<Mesh, 6> Skin::wide1;
+std::array<Mesh, 6> Skin::wide2;
+
 static size_t storeData(char* ptr, size_t size, size_t nmemb, void* vector) {
     std::vector<u8>* buffer = static_cast<std::vector<u8>*>(vector);
     buffer->insert(buffer->end(), (u8*)ptr, (u8*)ptr + (size * nmemb));
@@ -49,8 +55,33 @@ Skin::~Skin() {
     C3D_TexDelete(&skin);
 }
 
+void Skin::initModels() {
+    static bool initialised = false;
+    if(!initialised) {
+        loadSkinGLB(ogSkin, "romfs:/ogskin.glb");
+        loadSkinGLB(slim1, "romfs:/slim1.glb");
+        loadSkinGLB(slim2, "romfs:/slim2.glb");
+        loadSkinGLB(wide1, "romfs:/wide1.glb");
+        loadSkinGLB(wide2, "romfs:/wide2.glb");
+        initialised = true;
+    }
+}
+
 void Skin::use() {
     C3D_TexBind(0, &skin);
+}
+
+void Skin::render() {
+    use();
+    if(type == SKIN_SLIM) {
+        for(Mesh& m : slim1) { m.render(); }
+        for(Mesh& m : slim2) { m.render(); }
+    } else if (type == SKIN_WIDE) {
+        for(Mesh& m : wide1) { m.render(); }
+        for(Mesh& m : wide2) { m.render(); }
+    } else {
+        for(Mesh& m : ogSkin) { m.render(); }
+    }
 }
 
 void Skin::download(const std::string& p_name) {
@@ -73,7 +104,7 @@ void Skin::download(const std::string& p_name) {
     u32* rgbaData = reinterpret_cast<u32*>(&skinData[0]);
     u32* texBuffer = reinterpret_cast<u32*>(skin.data);
 
-    for(int i = 0; i < width * height; i++) 
+    for(u32 i = 0; i < width * height; i++) 
         texBuffer[posToTex(i)] = std::byteswap(rgbaData[i]);
     
     skin.height = height;
