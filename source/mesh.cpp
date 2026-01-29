@@ -25,7 +25,6 @@ Mesh::Mesh(const std::string& obj) {
 }
 
 Mesh::~Mesh() {
-    std::cout << "destruct\n";
     linearFree(meshData);
     meshData = nullptr;
     linearFree(indices);

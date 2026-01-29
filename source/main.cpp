@@ -171,7 +171,7 @@ int main(int argc, char* argv[]) {
         C3D_RenderTargetClear(top, C3D_CLEAR_ALL, C2D_Color32(255, 128, 199, 255), 0);
         C3D_FrameDrawOn(top);
 
-        C3D_Mtx transformMTX = transform.toMtx();
+        const C3D_Mtx transformMTX = transform.toMtx();
 	    C3D_TexBind(0, &steve);
         C3D_SetBufInfo(&bufInfo);
         shader.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);

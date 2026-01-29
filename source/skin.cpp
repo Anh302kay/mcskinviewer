@@ -71,16 +71,35 @@ void Skin::use() {
     C3D_TexBind(0, &skin);
 }
 
+void Skin::renderSkin(std::array<Mesh, 6>& skin1) {
+    constexpr u16 layer1[] = { TORSO, HEAD, LARM, LLEG, RARM, RLEG };
+    for(int i = 0; i < 6; i++) {
+        if(visibility & layer1[i])
+            skin1[i].render();
+    }
+}
+
+void Skin::renderSkin(std::array<Mesh, 6>& skin1, std::array<Mesh, 6>& skin2) {
+    constexpr u16 layer1[] = { TORSO, HEAD, LARM, LLEG, RARM, RLEG };
+    constexpr u16 layer2[] = { OTORSO, HAT, OLARM, OLLEG, ORARM, ORLEG };
+    for(int i = 0; i < 6; i++) {
+        if(visibility & layer1[i])
+            skin1[i].render();
+    }
+    for(int i = 0; i < 6; i++) {
+        if(visibility & layer2[i])
+            skin2[i].render();
+    }
+}
+
 void Skin::render() {
     use();
     if(type == SKIN_SLIM) {
-        for(Mesh& m : slim1) { m.render(); }
-        for(Mesh& m : slim2) { m.render(); }
+        renderSkin(slim1, slim2);
     } else if (type == SKIN_WIDE) {
-        for(Mesh& m : wide1) { m.render(); }
-        for(Mesh& m : wide2) { m.render(); }
+        renderSkin(wide1, wide2);
     } else {
-        for(Mesh& m : ogSkin) { m.render(); }
+        renderSkin(ogSkin);
     }
 }
 

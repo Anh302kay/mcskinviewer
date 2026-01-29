@@ -25,7 +25,7 @@ inline std::array<Mesh, 6> loadSkinGLB(const std::string& path) {
     for(auto [index, mesh] : std::views::enumerate(model.meshes))  {
         std::vector<vertex> vertices;
         std::vector<u16> indicesVec;
-        std::cout << mesh.name;
+        std::cout << mesh.name << "\n";
         for(auto& primitive : mesh.primitives) {
             if(primitive.indices >= 0) {
                 tinygltf::Accessor& accessor = model.accessors.at(primitive.attributes["POSITION"]);
@@ -101,6 +101,7 @@ inline void loadSkinGLB(std::array<Mesh, 6>& skin, const std::string& path) {
     for(auto [index, mesh] : std::views::enumerate(model.meshes))  {
         std::vector<vertex> vertices;
         std::vector<u16> indicesVec;
+        // std::cout << mesh.name << "\n";
         for(auto& primitive : mesh.primitives) {
             if(primitive.indices >= 0) {
                 tinygltf::Accessor& accessor = model.accessors.at(primitive.attributes["POSITION"]);

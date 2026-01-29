@@ -34,6 +34,15 @@ enum {
     FULL_SKIN = LAYER_ONE | LAYER_TWO
 };
 
+enum {
+    mesh_body = 0,
+    mesh_head,
+    mesn_larm,
+    mesn_lleg,
+    mesn_rarm,
+    mesn_rleg
+};
+
 class Skin {
 public:
     Skin();
@@ -50,6 +59,8 @@ public:
     u16 visibility = FULL_SKIN;
     std::string name;
 private:
+    void renderSkin(std::array<Mesh, 6>& skin1);
+    void renderSkin(std::array<Mesh, 6>& skin1, std::array<Mesh, 6>& skin2);
     static std::array<Mesh, 6> ogSkin;
     static std::array<Mesh, 6> slim1;
     static std::array<Mesh, 6> slim2;
