@@ -110,7 +110,7 @@ int main(int argc, char* argv[]) {
     gfxInitDefault(); 
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
     C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
-    consoleInit(GFX_BOTTOM, NULL);
+    // consoleInit(GFX_BOTTOM, NULL);
 
     u32 *soc_sharedmem;
     soc_sharedmem = (u32*)memalign(0x1000, 0x100000);
@@ -118,6 +118,9 @@ int main(int argc, char* argv[]) {
 
     C3D_RenderTarget* top = C3D_RenderTargetCreate(240, 400, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
     C3D_RenderTargetSetOutput(top, GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
+
+	C3D_RenderTarget* bottom = C3D_RenderTargetCreate(240, 320, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
+    C3D_RenderTargetSetOutput(bottom, GFX_BOTTOM, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
 
     C3D_AttrInfo* attribute = C3D_GetAttrInfo();
     AttrInfo_Init(attribute);
@@ -137,10 +140,11 @@ int main(int argc, char* argv[]) {
 	C3D_TexSetWrap(&steve, GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
 	C3D_TexBind(0, &steve);
 
-    C3D_TexEnv* env = C3D_GetTexEnv(0);
-	C3D_TexEnvInit(env);
-	C3D_TexEnvSrc(env, C3D_Both, GPU_TEXTURE0);
-	C3D_TexEnvFunc(env, C3D_Both, GPU_REPLACE);
+    C3D_TexEnv env;
+	C3D_TexEnvInit(&env);
+	C3D_TexEnvSrc(&env, C3D_Both, GPU_TEXTURE0);
+	C3D_TexEnvFunc(&env, C3D_Both, GPU_REPLACE);
+	C3D_SetTexEnv(0, &env);
 
     Shader shader((u32*)tex_shbin, tex_shbin_size);
     shader.use();
@@ -171,6 +175,9 @@ int main(int argc, char* argv[]) {
         C3D_RenderTargetClear(top, C3D_CLEAR_ALL, C2D_Color32(255, 128, 199, 255), 0);
         C3D_FrameDrawOn(top);
 
+		shader.use();
+		C3D_SetTexEnv(0, &env);
+
         const C3D_Mtx transformMTX = transform.toMtx();
 	    C3D_TexBind(0, &steve);
         C3D_SetBufInfo(&bufInfo);
@@ -186,7 +193,16 @@ int main(int argc, char* argv[]) {
         shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &testTransformMTX);
         skinStr.render();
 
-        C3D_FrameEnd(0);
+        C3D_RenderTargetClear(bottom, C3D_CLEAR_ALL, C2D_Color32(128, 199, 199, 255), 0);
+		C3D_FrameDrawOn(bottom);
+		C2D_SceneTarget(bottom);
+		C2D_Prepare();
+
+		C2D_DrawRectSolid(10, 10, 0, 20, 20, C2D_Color32(0, 0, 255, 255));
+
+		C2D_Flush();
+        
+		C3D_FrameEnd(0);
     }
 
     C3D_TexDelete(&steve);
