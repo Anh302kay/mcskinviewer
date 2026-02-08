@@ -2,6 +2,7 @@
 
 struct v2f {
     v2f() : x(0), y(0) {}
+    v2f(float p_x) : x(p_x), y(p_x) {}
     v2f(float p_x, float p_y) : x(p_x), y(p_y) {}
     float x, y;
 };

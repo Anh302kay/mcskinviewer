@@ -17,6 +17,7 @@
 #include "mesh.hpp"
 #include "skin.hpp"
 #include "glbloader.hpp"
+#include "ui.hpp"
 
 #include "colour_shbin.h"
 #include "tex_shbin.h"
@@ -158,9 +159,13 @@ int main(int argc, char* argv[]) {
     skinStr.initModels();
     skinStr.download("Bob_Gangster");
 
+	button test(v2f(5), v2f(50), C2D_Color32(255,255,255,255), 3);
+	touchPosition touch;
+
     while (aptMainLoop())
     {
         hidScanInput();
+		hidTouchRead(&touch);
         
         const u32 kDown = hidKeysDown();
         if(kDown & KEY_START)
@@ -172,7 +177,7 @@ int main(int argc, char* argv[]) {
         const C3D_Mtx projection = camera.projection;
 
         C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-        C3D_RenderTargetClear(top, C3D_CLEAR_ALL, C2D_Color32(255, 128, 199, 255), 0);
+        C3D_RenderTargetClear(top, C3D_CLEAR_ALL, C2D_Color32(1, 128, 199, 255), 0);
         C3D_FrameDrawOn(top);
 
 		shader.use();
@@ -193,13 +198,12 @@ int main(int argc, char* argv[]) {
         shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &testTransformMTX);
         skinStr.render();
 
-        C3D_RenderTargetClear(bottom, C3D_CLEAR_ALL, C2D_Color32(128, 199, 199, 255), 0);
+        C3D_RenderTargetClear(bottom, C3D_CLEAR_ALL, C2D_Color32(1, 199, 199, 255), 0);
 		C3D_FrameDrawOn(bottom);
 		C2D_SceneTarget(bottom);
 		C2D_Prepare();
 
-		C2D_DrawRectSolid(10, 10, 0, 20, 20, C2D_Color32(0, 0, 255, 255));
-
+		test.draw();
 		C2D_Flush();
         
 		C3D_FrameEnd(0);

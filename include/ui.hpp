@@ -16,11 +16,15 @@ struct button {
     v2f scale;
     v2f offset;
     float outline;
-    bool touched(const touchPosition& touchPos);
+    u32 colour;
+    u8 mode;
+    button(v2f p_pos, v2f p_dim, u32 p_colour = C2D_Color32(255,255,255,255), float outline = 1.f, v2f scale = v2f(1.f), v2f offset = v2f(0.f));
+    bool touched(const touchPosition& touch);
     void draw();
 
     enum : u8{
-        img = 0,
-        text
+        NONE = 0,
+        IMAGE,
+        TEXT,
     };
 };
