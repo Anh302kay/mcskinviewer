@@ -37,3 +37,15 @@ void button::draw() {
             break;
     }
 }
+
+UI::UI() {
+    keyboardSpritesheet = C2D_SpriteSheetLoad("romfs:/gfx/keyboard.t3x");
+    keyboard[0] = C2D_SpriteSheetGetImage(keyboardSpritesheet, 0);
+    keyboard[1] = C2D_SpriteSheetGetImage(keyboardSpritesheet, 1);
+}
+
+UI::~UI() {
+    C2D_SpriteSheetFree(keyboardSpritesheet);
+    for(auto& img : keyboard)
+        img.tex = nullptr;
+}

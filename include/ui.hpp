@@ -38,10 +38,13 @@ enum {
 
 class UI {
 public:
+    UI();
+    ~UI();
     void update(auto& skin);
     void draw();
 private:
     u8 mode;
     bool capsLock = false;
+    C2D_SpriteSheet keyboardSpritesheet;
     C2D_Image keyboard[2];
 };
