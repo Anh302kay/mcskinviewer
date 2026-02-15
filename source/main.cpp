@@ -205,7 +205,7 @@ int main(int argc, char* argv[]) {
 		C3D_FrameDrawOn(bottom);
 		C2D_SceneTarget(bottom);
 		C2D_Prepare();
-
+		
 		C2D_DrawImageAt(keyboard, 0, 0, 0);
 		test.draw();
 		C2D_Flush();

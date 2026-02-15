@@ -30,11 +30,18 @@ struct button {
     };
 };
 
+enum {
+    MENU_CAMERA,
+    MENU_VISIBILITY,
+    MENU_KEYBOARD
+};
+
 class UI {
 public:
-
-
+    void update(auto& skin);
+    void draw();
 private:
-
-
+    u8 mode;
+    bool capsLock = false;
+    C2D_Image keyboard[2];
 };
