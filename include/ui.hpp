@@ -5,8 +5,12 @@
 #include <citro2d.h>
 
 #include "utils.hpp"
-
 struct button {
+
+    button(v2f p_pos, v2f p_dim, u32 p_colour = C2D_Color32(255,255,255,255), float outline = 1.f, v2f scale = v2f(1.f), v2f offset = v2f(0.f));
+    bool touched(const touchPosition& touch);
+    void draw();
+
     union {
         C2D_Text text;
         C2D_Image img;
@@ -18,13 +22,19 @@ struct button {
     float outline;
     u32 colour;
     u8 mode;
-    button(v2f p_pos, v2f p_dim, u32 p_colour = C2D_Color32(255,255,255,255), float outline = 1.f, v2f scale = v2f(1.f), v2f offset = v2f(0.f));
-    bool touched(const touchPosition& touch);
-    void draw();
 
     enum : u8{
         NONE = 0,
         IMAGE,
         TEXT,
     };
+};
+
+class UI {
+public:
+
+
+private:
+
+
 };

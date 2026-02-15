@@ -161,6 +161,9 @@ int main(int argc, char* argv[]) {
 
 	button test(v2f(5), v2f(50), C2D_Color32(255,255,255,255), 3);
 	touchPosition touch;
+	
+	C2D_SpriteSheet sheet = C2D_SpriteSheetLoad("romfs:/gfx/keyboard.t3x");
+	C2D_Image keyboard = C2D_SpriteSheetGetImage(sheet, 0);
 
     while (aptMainLoop())
     {
@@ -203,11 +206,14 @@ int main(int argc, char* argv[]) {
 		C2D_SceneTarget(bottom);
 		C2D_Prepare();
 
+		C2D_DrawImageAt(keyboard, 0, 0, 0);
 		test.draw();
 		C2D_Flush();
         
 		C3D_FrameEnd(0);
     }
+
+	C2D_SpriteSheetFree(sheet);
 
     C3D_TexDelete(&steve);
     linearFree(vboData);

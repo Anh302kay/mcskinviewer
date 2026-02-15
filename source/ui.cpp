@@ -26,7 +26,14 @@ void button::draw() {
     C2D_DrawRectSolid(pos.x+outline, pos.y+outline, 0, dim.x-outline*2, dim.y-outline*2, background);
 
     switch(mode) {
+        case IMAGE:
+            break;
+
+        case TEXT:
+            break;
+        
+        case NONE:
         default:
-        break;
+            break;
     }
 }
