@@ -40,9 +40,10 @@ class UI {
 public:
     UI();
     ~UI();
-    void update(auto& skin);
+    void update(touchPosition touch, auto& skin);
     void draw();
 private:
+    void keyboardInput(touchPosition touch);
     u8 mode;
     bool capsLock = false;
     C2D_SpriteSheet keyboardSpritesheet;

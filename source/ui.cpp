@@ -6,12 +6,14 @@
 #include "ui.hpp"
 #include "utils.hpp"
 
+const char* keyboardLUT = {"qwertyuiopasdfghjklzxcvbnm"
+                           "QWERTYUIOPASDFGHJKLZXCVBNM"};
+
 button::button(v2f p_pos, v2f p_dim, u32 p_colour, float p_outline, v2f p_scale, v2f p_offset) 
     :pos(p_pos), dim(p_dim), scale(p_scale), offset(p_offset), outline(p_outline), colour(p_colour)
 {
 
 }
-
 
 bool button::touched(const touchPosition& touch) {
     return (touch.px > pos.x && touch.py > pos.y && touch.px <  pos.x + dim.x && touch.py < pos.y + dim.y);
@@ -48,4 +50,46 @@ UI::~UI() {
     C2D_SpriteSheetFree(keyboardSpritesheet);
     for(auto& img : keyboard)
         img.tex = nullptr;
+}
+
+void UI::update(touchPosition touch, auto& skin) {
+    switch (mode) {
+    case MENU_KEYBOARD:
+        keyboardInput(touch);
+        break;
+    default:
+        break;
+    }
+}
+
+void UI::draw() {
+    switch (mode) {
+    case MENU_KEYBOARD:
+        C2D_DrawImageAt(keyboard[capsLock], 0, 0, 0);
+        break;
+    default:
+        break;
+    }
+}
+
+void UI::keyboardInput(touchPosition touch) {
+    static std::string cache;
+    cache.reserve(20);
+    touch.py -= 58;
+    switch (touch.py / 50) {
+    case 0:
+        touch.px -= 7;
+        cache += keyboardLUT[touch.px/60 + capsLock * 26];
+        break;
+    case 1:
+        touch.px -= 15;
+        cache += keyboardLUT[touch.px/60 + capsLock * 26 + 10];
+        break;
+    case 2:
+        touch.px -= 55;
+        cache += keyboardLUT[touch.px/60 + capsLock * 26 + 19];
+        break;
+    default:
+        break;
+    }
 }
