@@ -104,6 +104,8 @@ void Skin::render() {
 }
 
 void Skin::download(const std::string& p_name) {
+    skinData.clear();
+    skinPNG.clear();
     const std::string URL = "https://minotar.net/skin/" + p_name;
     curl_easy_setopt(curl, CURLOPT_URL, URL.c_str());
     CURLcode res = curl_easy_perform(curl);

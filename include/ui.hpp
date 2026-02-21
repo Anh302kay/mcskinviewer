@@ -4,6 +4,7 @@
 #include <citro3d.h>
 #include <citro2d.h>
 
+#include "skin.hpp"
 #include "utils.hpp"
 struct button {
 
@@ -33,19 +34,24 @@ struct button {
 enum {
     MENU_CAMERA,
     MENU_VISIBILITY,
-    MENU_KEYBOARD
+    MENU_KEYBOARD,
+    MENU_TRACKPAD
 };
 
 class UI {
 public:
     UI();
     ~UI();
-    void update(touchPosition touch, auto& skin);
+    void update( Skin& skin);
     void draw();
 private:
-    void keyboardInput(touchPosition touch);
-    u8 mode;
+    void keyboardInput(Skin& skin);
+    u8 mode = MENU_KEYBOARD;
     bool capsLock = false;
     C2D_SpriteSheet keyboardSpritesheet;
     C2D_Image keyboard[2];
+    C2D_TextBuf textBuf;
+    C2D_Font font;
+    C2D_Text text;
+    touchPosition touch;
 };

@@ -152,6 +152,8 @@ int main(int argc, char* argv[]) {
 
     Camera camera;
 
+	UI ui;
+
     Transform transform(v3f(0,0,-2), v3f(0, 45, 45));
     Transform testTransform (v3f(0,0,-4), v3f(0.f, 0.f, 0.f), v3f(1.f));
 
@@ -160,21 +162,17 @@ int main(int argc, char* argv[]) {
     skinStr.download("Bob_Gangster");
 
 	button test(v2f(5), v2f(50), C2D_Color32(255,255,255,255), 3);
-	touchPosition touch;
-	
-	C2D_SpriteSheet sheet = C2D_SpriteSheetLoad("romfs:/gfx/keyboard.t3x");
-	C2D_Image keyboard = C2D_SpriteSheetGetImage(sheet, 0);
 
     while (aptMainLoop())
     {
         hidScanInput();
-		hidTouchRead(&touch);
         
         const u32 kDown = hidKeysDown();
         if(kDown & KEY_START)
             break;
 
         camera.update();
+		ui.update(skinStr);
 
         const C3D_Mtx lookAt = camera.getLookAt();
         const C3D_Mtx projection = camera.projection;
@@ -206,14 +204,11 @@ int main(int argc, char* argv[]) {
 		C2D_SceneTarget(bottom);
 		C2D_Prepare();
 		
-		C2D_DrawImageAt(keyboard, 0, 0, 0);
-		test.draw();
+		ui.draw();
 		C2D_Flush();
         
 		C3D_FrameEnd(0);
     }
-
-	C2D_SpriteSheetFree(sheet);
 
     C3D_TexDelete(&steve);
     linearFree(vboData);
