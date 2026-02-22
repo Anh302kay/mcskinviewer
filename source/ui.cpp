@@ -21,24 +21,26 @@ const char* keyboardLUT = { "qwertyuiopasdfghjklzxcvbnm"
 
 button::button(v2f p_pos, v2f p_dim, u32 p_colour, float p_outline, v2f p_scale, v2f p_offset) 
     :pos(p_pos), dim(p_dim), scale(p_scale), offset(p_offset), outline(p_outline), colour(p_colour)
-{
+{}
 
-}
+button::button(C2D_Image p_img, v2f p_pos, v2f p_dim, u32 p_colour, float p_outline, v2f p_scale, v2f p_offset) 
+    :img(p_img), pos(p_pos), dim(p_dim), scale(p_scale), offset(p_offset), outline(p_outline), colour(p_colour), mode(IMAGE)
+{}
 
 bool button::touched(const touchPosition& touch) {
     return (touch.px > pos.x && touch.py > pos.y && touch.px <  pos.x + dim.x && touch.py < pos.y + dim.y);
 }
 
 void button::draw() {
-    if(outline == 0) return;
-
+    if(outline != 0) {
     constexpr u32 background = C2D_Color32(255, 199, 199, 255);
-
     C2D_DrawRectSolid(pos.x, pos.y, 0, dim.x, dim.y, colour);
     C2D_DrawRectSolid(pos.x+outline, pos.y+outline, 0, dim.x-outline*2, dim.y-outline*2, background);
+    }
 
     switch(mode) {
         case IMAGE:
+            C2D_DrawImageAt(img, pos.x+offset.x, pos.y+offset.y, 0);
             break;
 
         case TEXT:
@@ -52,17 +54,25 @@ void button::draw() {
 
 UI::UI() {
     keyboardSpritesheet = C2D_SpriteSheetLoad("romfs:/gfx/keyboard.t3x");
+    iconSpritesheet = C2D_SpriteSheetLoad("romfs:/gfx/icons.t3x");
     keyboard[0] = C2D_SpriteSheetGetImage(keyboardSpritesheet, 0);
     keyboard[1] = C2D_SpriteSheetGetImage(keyboardSpritesheet, 1);
-    textBuf = C2D_TextBufNew(21);
+    skinTextBuf = C2D_TextBufNew(21);
     font = C2D_FontLoad("romfs:/gfx/Minecraft.bcfnt");
+    // buttons = button(C2D_SpriteSheetGetImage(iconSpritesheet, 2), {65, 215}, {27,27});
+    // buttons.offset.x += 1;
+    // buttons.offset.y += 1;
+    // buttons.outline = 0;
 }
 
 UI::~UI() {
-    C2D_TextBufDelete(textBuf);
+    C2D_TextBufDelete(skinTextBuf);
     C2D_FontFree(font);
+    skinTextBuf = nullptr;
+    font = nullptr;
     for(auto& img : keyboard)
         img.tex = nullptr;
+    C2D_SpriteSheetFree(iconSpritesheet);
     C2D_SpriteSheetFree(keyboardSpritesheet);
 }
 
@@ -81,11 +91,12 @@ void UI::update(Skin& skin) {
 }
 
 void UI::draw() {
-    C2D_DrawRectSolid(67, 216, 0, 188, 24, C2D_Color32(255,255,255,255));
+    C2D_DrawRectSolid(60, 213, 0, 202, 27, C2D_Color32(0,0,0,255));
+    // buttons.draw();
     switch (mode) {
     case MENU_KEYBOARD:
         C2D_DrawImageAt(keyboard[capsLock], 0, 0, 0);
-        C2D_DrawText(&text, C2D_WithColor | C2D_AtBaseline, 10, 20, 0, .8f, .8f, C2D_Color32(255,255,255,255));
+        C2D_DrawText(&skinText, C2D_WithColor | C2D_AtBaseline, 10, 25, 0, .8f, .8f, C2D_Color32(255,255,255,255));
         break;
     default:
         break;
@@ -95,15 +106,17 @@ void UI::draw() {
 void UI::keyboardInput(Skin& skin) {
     static std::string cache;
     cache.reserve(20);
+    constexpr u16 keyboardOffset = 55;
     u16 touchX = touch.px;
-    u16 touchY = touch.py - 58;
+    u16 touchY = touch.py - keyboardOffset;
+    const u32 kDown = hidKeysDown();
 
     constexpr rectI del(272, 162, 24, 31);
-    if(touchedBox(touch, del)) {
+    if((touchedBox(touch, del) || kDown & KEY_B) && !cache.empty()) {
         cache.pop_back();
-        C2D_TextBufClear(textBuf);
-        C2D_TextFontParse(&text, font, textBuf, cache.c_str());
-        C2D_TextOptimize(&text);
+        C2D_TextBufClear(skinTextBuf);
+        C2D_TextFontParse(&skinText, font, skinTextBuf, cache.c_str());
+        C2D_TextOptimize(&skinText);
         return;
     }
 
@@ -114,7 +127,7 @@ void UI::keyboardInput(Skin& skin) {
     }
 
     constexpr rectI enter(288, 122, 29, 44);
-    if(touchedBox(touch, enter)) {
+    if(touchedBox(touch, enter) || (kDown & KEY_A)) {
         skin.download(cache);
         return;
     }
@@ -125,15 +138,19 @@ void UI::keyboardInput(Skin& skin) {
     constexpr rectI underscore(272, 198, 24, 31);
     if(touchedBox(touch, underscore)) {
         cache += "_";
-        C2D_TextBufClear(textBuf);
-        C2D_TextFontParse(&text, font, textBuf, cache.c_str());
-        C2D_TextOptimize(&text);
+        C2D_TextBufClear(skinTextBuf);
+        C2D_TextFontParse(&skinText, font, skinTextBuf, cache.c_str());
+        C2D_TextOptimize(&skinText);
         return;
     }
 
-    if(touch.py > 35 && touch.py < 57) {
+    if(touch.py > keyboardOffset - 23 && touch.py < 57) {
         touchX -= 2;
         cache += keyboardLUT[touchX/30 + 52];
+        C2D_TextBufClear(skinTextBuf);
+        C2D_TextFontParse(&skinText, font, skinTextBuf, cache.c_str());
+        C2D_TextOptimize(&skinText);
+        return;
     }
 
     switch (touchY / 50) {
@@ -155,7 +172,7 @@ void UI::keyboardInput(Skin& skin) {
     default:
         break;
     }
-    C2D_TextBufClear(textBuf);
-    C2D_TextFontParse(&text, font, textBuf, cache.c_str());
-    C2D_TextOptimize(&text);
+    C2D_TextBufClear(skinTextBuf);
+    C2D_TextFontParse(&skinText, font, skinTextBuf, cache.c_str());
+    C2D_TextOptimize(&skinText);
 }

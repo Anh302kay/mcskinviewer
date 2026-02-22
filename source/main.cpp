@@ -9,6 +9,7 @@
 #include <malloc.h>
 #include <curl/curl.h>
 #include <external/lodepng.h>
+#include <memory>
 
 #include "utils.hpp"
 #include "shader.hpp"
@@ -108,7 +109,7 @@ static bool loadTex(const std::string& path, C3D_Tex* tex, C3D_TexCube* cube)
 
 int main(int argc, char* argv[]) {
 	romfsInit();
-    gfxInitDefault(); 
+    gfxInitDefault();
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
     C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
     // consoleInit(GFX_BOTTOM, NULL);
@@ -152,7 +153,7 @@ int main(int argc, char* argv[]) {
 
     Camera camera;
 
-	UI ui;
+	auto ui = std::make_unique<UI>();
 
     Transform transform(v3f(0,0,-2), v3f(0, 45, 45));
     Transform testTransform (v3f(0,0,-4), v3f(0.f, 0.f, 0.f), v3f(1.f));
@@ -166,13 +167,13 @@ int main(int argc, char* argv[]) {
     while (aptMainLoop())
     {
         hidScanInput();
-        
+
         const u32 kDown = hidKeysDown();
         if(kDown & KEY_START)
             break;
 
         camera.update();
-		ui.update(skinStr);
+		ui->update(skinStr);
 
         const C3D_Mtx lookAt = camera.getLookAt();
         const C3D_Mtx projection = camera.projection;
@@ -203,10 +204,10 @@ int main(int argc, char* argv[]) {
 		C3D_FrameDrawOn(bottom);
 		C2D_SceneTarget(bottom);
 		C2D_Prepare();
-		
-		ui.draw();
+
+		ui->draw();
 		C2D_Flush();
-        
+
 		C3D_FrameEnd(0);
     }
 

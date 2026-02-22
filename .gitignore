@@ -2,3 +2,5 @@ build/
 mcskinviewer.*
 romfs/gfx/
 .vscode
+.clangd
+decomp.txt
