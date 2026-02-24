@@ -152,28 +152,32 @@ int main(int argc, char* argv[]) {
     shader.use();
 
     Camera camera;
+	camera.viewLock = true;
 
 	auto ui = std::make_unique<UI>();
 
     Transform transform(v3f(0,0,-2), v3f(0, 45, 45));
-    Transform testTransform (v3f(0,0,-4), v3f(0.f, 0.f, 0.f), v3f(1.f));
 
-    Skin skinStr;
-    skinStr.initModels();
-    skinStr.download("Bob_Gangster");
+    Skin skin;
+    skin.initModels();
+    skin.download("Bob_Gangster");
+    Transform skinTransform (v3f(0,-1.25, -1), v3f(0.f, 0.f, 0.f), v3f(1.f));
 
-	button test(v2f(5), v2f(50), C2D_Color32(255,255,255,255), 3);
+	circlePosition cPad;
 
     while (aptMainLoop())
     {
         hidScanInput();
+		hidCircleRead(&cPad);
 
         const u32 kDown = hidKeysDown();
         if(kDown & KEY_START)
             break;
 
         camera.update();
-		ui->update(skinStr);
+		ui->update(skin, skinTransform, camera);
+
+		skinTransform.rotation.y -= cPad.dx / 96.f;
 
         const C3D_Mtx lookAt = camera.getLookAt();
         const C3D_Mtx projection = camera.projection;
@@ -185,20 +189,20 @@ int main(int argc, char* argv[]) {
 		shader.use();
 		C3D_SetTexEnv(0, &env);
 
-        const C3D_Mtx transformMTX = transform.toMtx();
-	    C3D_TexBind(0, &steve);
-        C3D_SetBufInfo(&bufInfo);
-        shader.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
-        shader.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
-        shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &transformMTX);
-        C3D_DrawArrays(GPU_TRIANGLES, 0, sizeof(vertices)/(sizeof(vertex)));
+        // const C3D_Mtx transformMTX = transform.toMtx();
+	    // C3D_TexBind(0, &steve);
+        // C3D_SetBufInfo(&bufInfo);
+        // shader.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
+        // shader.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
+        // shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &transformMTX);
+        // C3D_DrawArrays(GPU_TRIANGLES, 0, sizeof(vertices)/(sizeof(vertex)));
 
-        skinStr.use();
-        const C3D_Mtx testTransformMTX = testTransform.toMtx();
+        skin.use();
+        const C3D_Mtx skinMtx = skinTransform.toMtx();
         shader.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
         shader.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
-        shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &testTransformMTX);
-        skinStr.render();
+        shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &skinMtx);
+        skin.render();
 
         C3D_RenderTargetClear(bottom, C3D_CLEAR_ALL, C2D_Color32(1, 199, 199, 255), 0);
 		C3D_FrameDrawOn(bottom);

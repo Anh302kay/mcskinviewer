@@ -19,10 +19,12 @@ public:
 
     float cameraSpeed = 0.05f;
 	int cPadDeadzone = 10;
+    bool viewLock = false;
 
     void update();
     void rotateCamera(v2f delta);
     C3D_Mtx getLookAt();
+    void changeFOV(float fov) { Mtx_PerspTilt(&projection, C3D_AngleFromDegrees(fov), C3D_AspectRatioTop, 0.01f, 1000.f, false); }
 
 private:
     circlePosition cPad;

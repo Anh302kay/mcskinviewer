@@ -76,11 +76,16 @@ UI::~UI() {
     C2D_SpriteSheetFree(keyboardSpritesheet);
 }
 
-void UI::update(Skin& skin) {
+void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
     const u32 kDown = hidKeysDown();
     const u32 kHeld = hidKeysHeld();
     hidTouchRead(&touch);
     switch (mode) {
+
+    case MENU_CAMERA:
+        
+        break;
+
     case MENU_KEYBOARD:
         if(kDown & KEY_TOUCH)
             keyboardInput(skin);

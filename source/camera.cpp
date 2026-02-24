@@ -19,7 +19,8 @@ void Camera::update() {
             touchOld = touch;
             firstLook = false;
         }
-        rotateCamera(v2f(touch.px - touchOld.px, touchOld.py - touch.py));
+        if(!viewLock)
+            rotateCamera(v2f(touch.px - touchOld.px, touchOld.py - touch.py));
         touchOld = touch;
     }
 
@@ -48,10 +49,11 @@ void Camera::update() {
 	if(cPad.dy > cPadDeadzone || cPad.dy < -cPadDeadzone) {
 		position = FVec3_Add(position, FVec3_Scale(front, cameraSpeed * (float)((float)cPad.dy/154.f)));
 	}
-	if(cPad.dx > cPadDeadzone || cPad.dx < -cPadDeadzone) {
-		position = FVec3_Add(position, FVec3_Scale(FVec3_Normalize(FVec3_Cross(front, up)), cameraSpeed * (float)((float)cPad.dx/154.f)));
-	}
-    rotateCamera(v2f(cStick.dx * 0.02, cStick.dy * 0.02));
+	// if(cPad.dx > cPadDeadzone || cPad.dx < -cPadDeadzone) {
+	// 	position = FVec3_Add(position, FVec3_Scale(FVec3_Normalize(FVec3_Cross(front, up)), cameraSpeed * (float)((float)cPad.dx/154.f)));
+	// }
+    if(!viewLock)
+        rotateCamera(v2f(cStick.dx * 0.02, cStick.dy * 0.02));
 }
 
 void Camera::rotateCamera(v2f delta) {

@@ -5,6 +5,7 @@
 #include <citro2d.h>
 
 #include "skin.hpp"
+#include "camera.hpp"
 #include "utils.hpp"
 struct button {
     button() {}
@@ -49,7 +50,7 @@ class UI {
 public:
     UI();
     ~UI();
-    void update( Skin& skin);
+    void update(Skin& skin, Transform& skinTransform, Camera& camera);
     void draw();
 private:
     void keyboardInput(Skin& skin);
