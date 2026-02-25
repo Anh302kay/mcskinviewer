@@ -124,24 +124,6 @@ int main(int argc, char* argv[]) {
 	C3D_RenderTarget* bottom = C3D_RenderTargetCreate(240, 320, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
     C3D_RenderTargetSetOutput(bottom, GFX_BOTTOM, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
 
-    C3D_AttrInfo* attribute = C3D_GetAttrInfo();
-    AttrInfo_Init(attribute);
-    AttrInfo_AddLoader(attribute, 0, GPU_FLOAT, 3); // pos
-    AttrInfo_AddLoader(attribute, 1, GPU_FLOAT, 2); // uv
-
-    void* vboData = linearAlloc(sizeof(vertices));
-    memcpy(vboData, vertices, sizeof(vertices));
-
-    C3D_BufInfo bufInfo;
-    BufInfo_Init(&bufInfo);
-    BufInfo_Add(&bufInfo, vboData, sizeof(vertex), 2, 0x10);
-
-    C3D_Tex steve;
-    loadTex("romfs:/gfx/steve.t3x", &steve, nullptr);
-    C3D_TexSetFilter(&steve, GPU_NEAREST, GPU_NEAREST);
-	C3D_TexSetWrap(&steve, GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
-	C3D_TexBind(0, &steve);
-
     C3D_TexEnv env;
 	C3D_TexEnvInit(&env);
 	C3D_TexEnvSrc(&env, C3D_Both, GPU_TEXTURE0);
@@ -188,15 +170,6 @@ int main(int argc, char* argv[]) {
 
 		shader.use();
 		C3D_SetTexEnv(0, &env);
-
-        // const C3D_Mtx transformMTX = transform.toMtx();
-	    // C3D_TexBind(0, &steve);
-        // C3D_SetBufInfo(&bufInfo);
-        // shader.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
-        // shader.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
-        // shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &transformMTX);
-        // C3D_DrawArrays(GPU_TRIANGLES, 0, sizeof(vertices)/(sizeof(vertex)));
-
         skin.use();
         const C3D_Mtx skinMtx = skinTransform.toMtx();
         shader.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
@@ -214,9 +187,6 @@ int main(int argc, char* argv[]) {
 
 		C3D_FrameEnd(0);
     }
-
-    C3D_TexDelete(&steve);
-    linearFree(vboData);
 
     socExit();
     free(soc_sharedmem);
