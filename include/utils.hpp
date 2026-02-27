@@ -1,4 +1,6 @@
 #pragma once
+#include <3ds.h>
+#include <citro3d.h>
 
 struct v2f {
     v2f() : x(0), y(0) {}
@@ -15,12 +17,12 @@ struct v3f {
 };
 
 struct rectI {
-    rectI() : x(0), y(0), w(0), h(0) {} 
-    constexpr rectI(u16 p_x, u16 p_y, u16 p_w, u16 p_h) : x(p_x), y(p_y), w(p_w), h(p_h) {} 
+    rectI() : x(0), y(0), w(0), h(0) {}
+    constexpr rectI(u16 p_x, u16 p_y, u16 p_w, u16 p_h) : x(p_x), y(p_y), w(p_w), h(p_h) {}
     u16 x, y, w, h;
 };
 
-struct vertex { 
+struct vertex {
     v3f position;
     v2f texCoords;
 };

@@ -4,3 +4,4 @@ romfs/gfx/
 .vscode
 .clangd
 decomp.txt
+compile_flags.txt

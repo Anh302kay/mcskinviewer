@@ -28,85 +28,6 @@
 	GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGB8) | \
 	GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
 
-float vertices[] = {
-    	// First face (PZ)
-	// First triangle
-	 -0.5f, -0.5f, +0.5f, 0.0f, 0.0f,
-	 +0.5f, -0.5f, +0.5f, 1.0f, 0.0f,
-	 +0.5f, +0.5f, +0.5f, 1.0f, 1.0f,
-	// Second triangle
-	 +0.5f, +0.5f, +0.5f, 1.0f, 1.0f,
-	 -0.5f, +0.5f, +0.5f, 0.0f, 1.0f,
-	 -0.5f, -0.5f, +0.5f, 0.0f, 0.0f,
-
-	// Second face (MZ)
-	// First triangle
-	 -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-	 -0.5f, +0.5f, -0.5f, 1.0f, 0.0f,
-	 +0.5f, +0.5f, -0.5f, 1.0f, 1.0f,
-	// Second triangle
-	 +0.5f, +0.5f, -0.5f, 1.0f, 1.0f,
-	 +0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-	 -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-	// Third face (PX)
-	// First triangle
-	 +0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-	 +0.5f, +0.5f, -0.5f, 1.0f, 0.0f,
-	 +0.5f, +0.5f, +0.5f, 1.0f, 1.0f,
-	// Second triangle
-	 +0.5f, +0.5f, +0.5f, 1.0f, 1.0f,
-	 +0.5f, -0.5f, +0.5f, 0.0f, 1.0f,
-	 +0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-	// Fourth face (MX)
-	// First triangle
-	 -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-	 -0.5f, -0.5f, +0.5f, 1.0f, 0.0f,
-	 -0.5f, +0.5f, +0.5f, 1.0f, 1.0f,
-	// Second triangle
-	 -0.5f, +0.5f, +0.5f, 1.0f, 1.0f,
-	 -0.5f, +0.5f, -0.5f, 0.0f, 1.0f,
-	 -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-	// Fifth face (PY)
-	// First triangle
-	 -0.5f, +0.5f, -0.5f, 0.0f, 0.0f,
-	 -0.5f, +0.5f, +0.5f, 1.0f, 0.0f,
-	 +0.5f, +0.5f, +0.5f, 1.0f, 1.0f,
-	// Second triangle
-	 +0.5f, +0.5f, +0.5f, 1.0f, 1.0f,
-	 +0.5f, +0.5f, -0.5f, 0.0f, 1.0f,
-	 -0.5f, +0.5f, -0.5f, 0.0f, 0.0f,
-
-	// Sixth face (MY)
-	// First triangle
-	 -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-	 +0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-	 +0.5f, -0.5f, +0.5f, 1.0f, 1.0f,
-	// Second triangle
-	 +0.5f, -0.5f, +0.5f, 1.0f, 1.0f,
-	 -0.5f, -0.5f, +0.5f, 0.0f, 1.0f,
-	 -0.5f, -0.5f, -0.5f, 0.0f, 0.0f
-};
-
-
-static bool loadTex(const std::string& path, C3D_Tex* tex, C3D_TexCube* cube)
-{
-	FILE* fp = fopen(path.c_str(), "rb");
-
-	Tex3DS_Texture t3x = Tex3DS_TextureImportStdio(fp, tex, cube, false);
-	if (!t3x) {
-	    fclose(fp);
-		return false;
-    }
-
-	// Delete the t3x object since we don't need it
-	Tex3DS_TextureFree(t3x);
-	fclose(fp);
-	return true;
-}
-
 int main(int argc, char* argv[]) {
 	romfsInit();
     gfxInitDefault();
@@ -138,12 +59,10 @@ int main(int argc, char* argv[]) {
 
 	auto ui = std::make_unique<UI>();
 
-    Transform transform(v3f(0,0,-2), v3f(0, 45, 45));
-
     Skin skin;
     skin.initModels();
     skin.download("Bob_Gangster");
-    Transform skinTransform (v3f(0,-1.25, -1), v3f(0.f, 0.f, 0.f), v3f(1.f));
+    Transform skinTransform (v3f(0,-1.25, -1), v3f(0.f), v3f(1.f));
 
 	circlePosition cPad;
 
