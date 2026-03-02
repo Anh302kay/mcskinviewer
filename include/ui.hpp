@@ -43,7 +43,9 @@ enum {
 enum {
     BUTTON_VISIBILITY,
     BUTTON_KEYBOARD,
-    NUMBUTTONS = 2
+    BUTTON_FREECAM,
+    NUMBUTTONS = 3,
+    NUMUIBUTTONS = 3
 };
 
 class UI {
@@ -56,10 +58,10 @@ private:
     void keyboardInput(Skin& skin);
     u8 mode = MENU_KEYBOARD;
     bool capsLock = false;
-    button buttons;
+    button buttons[NUMBUTTONS];
     C2D_SpriteSheet keyboardSpritesheet;
     C2D_SpriteSheet iconSpritesheet;
-    C2D_Image keyboard[NUMBUTTONS];
+    C2D_Image keyboard[2];
     C2D_TextBuf skinTextBuf;
     C2D_Font font;
     C2D_Text skinText;

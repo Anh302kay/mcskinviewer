@@ -72,6 +72,14 @@ void Camera::rotateCamera(v2f delta) {
     front = FVec3_Normalize(direction);
 }
 
+void Camera::resetAngle() {
+    direction = FVec3_New(0, 0, 0);
+    yaw = -90.f;
+    pitch = 0.f;
+    roll = 0.f;
+    firstLook = true;
+}
+
 C3D_Mtx Camera::getLookAt() {
     C3D_Mtx lookAt;
     Mtx_LookAt(&lookAt, position, FVec3_Add(position, front), up, false);

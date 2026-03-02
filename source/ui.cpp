@@ -59,10 +59,15 @@ UI::UI() {
     keyboard[1] = C2D_SpriteSheetGetImage(keyboardSpritesheet, 1);
     skinTextBuf = C2D_TextBufNew(21);
     font = C2D_FontLoad("romfs:/gfx/Minecraft.bcfnt");
-    // buttons = button(C2D_SpriteSheetGetImage(iconSpritesheet, 2), {65, 215}, {27,27});
-    // buttons.offset.x += 1;
-    // buttons.offset.y += 1;
-    // buttons.outline = 0;
+    buttons[BUTTON_VISIBILITY] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 0), {65, 215}, {27,27});
+    buttons[BUTTON_VISIBILITY].offset.x += 1;
+    buttons[BUTTON_VISIBILITY].offset.y += 1;
+    buttons[BUTTON_VISIBILITY].outline = 0;
+
+    buttons[BUTTON_KEYBOARD] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 1), {95, 215}, {27,27});
+    buttons[BUTTON_KEYBOARD].offset.x += 1;
+    buttons[BUTTON_KEYBOARD].offset.y += 1;
+    buttons[BUTTON_KEYBOARD].outline = 0;
 }
 
 UI::~UI() {
@@ -97,8 +102,12 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
 
 void UI::draw() {
     C2D_DrawRectSolid(60, 213, 0, 202, 27, C2D_Color32(0,0,0,255));
-    // buttons.draw();
+    buttons[BUTTON_VISIBILITY].draw();
+    buttons[BUTTON_KEYBOARD].draw();
     switch (mode) {
+    case MENU_CAMERA:
+
+    break;
     case MENU_KEYBOARD:
         C2D_DrawImageAt(keyboard[capsLock], 0, 0, 0);
         C2D_DrawText(&skinText, C2D_WithColor | C2D_AtBaseline, 10, 25, 0, .8f, .8f, C2D_Color32(255,255,255,255));
