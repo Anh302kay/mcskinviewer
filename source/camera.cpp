@@ -49,9 +49,9 @@ void Camera::update() {
 	if(cPad.dy > cPadDeadzone || cPad.dy < -cPadDeadzone) {
 		position = FVec3_Add(position, FVec3_Scale(front, cameraSpeed * (float)((float)cPad.dy/154.f)));
 	}
-	// if(cPad.dx > cPadDeadzone || cPad.dx < -cPadDeadzone) {
-	// 	position = FVec3_Add(position, FVec3_Scale(FVec3_Normalize(FVec3_Cross(front, up)), cameraSpeed * (float)((float)cPad.dx/154.f)));
-	// }
+	if((cPad.dx > cPadDeadzone || cPad.dx < -cPadDeadzone )&& !xLock) {
+		position = FVec3_Add(position, FVec3_Scale(FVec3_Normalize(FVec3_Cross(front, up)), cameraSpeed * (float)((float)cPad.dx/154.f)));
+	}
     if(!viewLock)
         rotateCamera(v2f(cStick.dx * 0.02, cStick.dy * 0.02));
 }

@@ -59,15 +59,16 @@ UI::UI() {
     keyboard[1] = C2D_SpriteSheetGetImage(keyboardSpritesheet, 1);
     skinTextBuf = C2D_TextBufNew(21);
     font = C2D_FontLoad("romfs:/gfx/Minecraft.bcfnt");
-    buttons[BUTTON_VISIBILITY] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 0), {65, 215}, {27,27});
-    buttons[BUTTON_VISIBILITY].offset.x += 1;
-    buttons[BUTTON_VISIBILITY].offset.y += 1;
-    buttons[BUTTON_VISIBILITY].outline = 0;
 
-    buttons[BUTTON_KEYBOARD] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 1), {95, 215}, {27,27});
-    buttons[BUTTON_KEYBOARD].offset.x += 1;
-    buttons[BUTTON_KEYBOARD].offset.y += 1;
-    buttons[BUTTON_KEYBOARD].outline = 0;
+    menuButtons[MENU_KEYBOARD] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 1), {65, 215}, {27,27}, C2D_Color32(255,255,255,255), 0.f, v2f(1.f), v2f(1.f));
+
+    menuButtons[MENU_VISIBILITY] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 0), {95, 215}, {27,27}, C2D_Color32(255,255,255,255), 0.f, v2f(1.f), v2f(1.f));
+
+    menuButtons[MENU_CAMERA] = button({125, 215}, {27,27}, C2D_Color32(255,255,255,255), 20.f, v2f(1.f), v2f(1.f));
+
+    cameraButtons[CAMERA_FREELOOK] = button(v2f(10.f), v2f(20.f));;
+    cameraButtons[CAMERA_TRACKPAD] = button(v2f(20.f), v2f(20.f));;
+
 }
 
 UI::~UI() {
@@ -85,15 +86,20 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
     const u32 kDown = hidKeysDown();
     const u32 kHeld = hidKeysHeld();
     hidTouchRead(&touch);
+
+    for(int i = 0; i < NUMMENUS; i++) {
+        if(menuButtons[i].touched(touch) && kDown & KEY_TOUCH) {
+            mode = i;
+        }
+    }
+
     switch (mode) {
-
-    case MENU_CAMERA:
-        
-        break;
-
     case MENU_KEYBOARD:
         if(kDown & KEY_TOUCH)
             keyboardInput(skin);
+        break;
+    case MENU_CAMERA:
+        cameraUpdate(camera);
         break;
     default:
         break;
@@ -102,15 +108,17 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
 
 void UI::draw() {
     C2D_DrawRectSolid(60, 213, 0, 202, 27, C2D_Color32(0,0,0,255));
-    buttons[BUTTON_VISIBILITY].draw();
-    buttons[BUTTON_KEYBOARD].draw();
-    switch (mode) {
-    case MENU_CAMERA:
+    for(button& b : menuButtons)
+        b.draw();
 
-    break;
+    switch (mode) {
     case MENU_KEYBOARD:
         C2D_DrawImageAt(keyboard[capsLock], 0, 0, 0);
         C2D_DrawText(&skinText, C2D_WithColor | C2D_AtBaseline, 10, 25, 0, .8f, .8f, C2D_Color32(255,255,255,255));
+        break;
+    case MENU_CAMERA:
+        for(button& b : cameraButtons)
+            b.draw();
         break;
     default:
         break;
@@ -189,4 +197,36 @@ void UI::keyboardInput(Skin& skin) {
     C2D_TextBufClear(skinTextBuf);
     C2D_TextFontParse(&skinText, font, skinTextBuf, cache.c_str());
     C2D_TextOptimize(&skinText);
+}
+
+void UI::cameraUpdate(Camera& camera) {
+    const u32 kDown = hidKeysDown();
+    const u32 kHeld = hidKeysHeld();
+
+    if(!(kDown & KEY_TOUCH)) return;
+    if(cameraButtons[CAMERA_FREELOOK].touched(touch)) {
+        camera.viewLock = !camera.viewLock;
+        camera.xLock = camera.viewLock;
+        if(camera.viewLock) {
+            camera.position.y = 0.f;
+            camera.resetAngle();
+            float angle = tanf(camera.position.y/camera.position.x);
+            camera.rotateCamera({angle, 0.f});
+        }
+
+    }
+
+    
+        // if(cameraButtons[i].touched(touch) && kDown & KEY_TOUCH) {
+        //     switch(i) {
+        //     case CAMERA_FREELOOK:
+        //         camera.viewLock = !camera.viewLock;
+        //         camera.xLock = !camera.xLock;
+        //         break;
+        //     case CAMERA_TRACKPAD:
+        //         break;
+        //     default:
+        //         break;
+        //     }
+        // }
 }

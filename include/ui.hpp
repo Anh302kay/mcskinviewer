@@ -34,18 +34,17 @@ struct button {
 };
 
 enum {
-    MENU_CAMERA,
-    MENU_VISIBILITY,
     MENU_KEYBOARD,
-    MENU_TRACKPAD
+    MENU_VISIBILITY,
+    MENU_CAMERA,
+    MENU_TRACKPAD,
+    NUMMENUS = 4
 };
 
 enum {
-    BUTTON_VISIBILITY,
-    BUTTON_KEYBOARD,
-    BUTTON_FREECAM,
-    NUMBUTTONS = 3,
-    NUMUIBUTTONS = 3
+    CAMERA_FREELOOK,
+    CAMERA_TRACKPAD,
+    NUMCAMERABUTTONS = 2
 };
 
 class UI {
@@ -56,9 +55,11 @@ public:
     void draw();
 private:
     void keyboardInput(Skin& skin);
+    void cameraUpdate(Camera& camera);
     u8 mode = MENU_KEYBOARD;
     bool capsLock = false;
-    button buttons[NUMBUTTONS];
+    button menuButtons[NUMMENUS];
+    button cameraButtons[NUMCAMERABUTTONS];
     C2D_SpriteSheet keyboardSpritesheet;
     C2D_SpriteSheet iconSpritesheet;
     C2D_Image keyboard[2];

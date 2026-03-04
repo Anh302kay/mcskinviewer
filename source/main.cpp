@@ -56,6 +56,7 @@ int main(int argc, char* argv[]) {
 
     Camera camera;
 	camera.viewLock = true;
+    camera.xLock = true;
 
 	auto ui = std::make_unique<UI>();
 
@@ -77,8 +78,9 @@ int main(int argc, char* argv[]) {
 
         camera.update();
 		ui->update(skin, skinTransform, camera);
-
-		skinTransform.rotation.y -= cPad.dx / 96.f;
+        
+        if(camera.viewLock)
+		    skinTransform.rotation.y -= cPad.dx / 96.f;
 
         const C3D_Mtx lookAt = camera.getLookAt();
         const C3D_Mtx projection = camera.projection;

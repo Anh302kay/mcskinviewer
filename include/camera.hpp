@@ -20,6 +20,7 @@ public:
     float cameraSpeed = 0.05f;
 	int cPadDeadzone = 10;
     bool viewLock = false;
+    bool xLock = false;
 
     void update();
     void rotateCamera(v2f delta);
