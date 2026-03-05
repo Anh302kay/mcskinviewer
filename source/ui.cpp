@@ -57,7 +57,8 @@ UI::UI() {
     iconSpritesheet = C2D_SpriteSheetLoad("romfs:/gfx/icons.t3x");
     keyboard[0] = C2D_SpriteSheetGetImage(keyboardSpritesheet, 0);
     keyboard[1] = C2D_SpriteSheetGetImage(keyboardSpritesheet, 1);
-    skinTextBuf = C2D_TextBufNew(21);
+    keyTextBuf = C2D_TextBufNew(21);
+    skinTextbuf = C2D_TextBufNew(128);
     font = C2D_FontLoad("romfs:/gfx/Minecraft.bcfnt");
 
     menuButtons[MENU_KEYBOARD] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 1), {65, 215}, {27,27}, C2D_Color32(255,255,255,255), 0.f, v2f(1.f), v2f(1.f));
@@ -72,9 +73,11 @@ UI::UI() {
 }
 
 UI::~UI() {
-    C2D_TextBufDelete(skinTextBuf);
+    C2D_TextBufDelete(skinTextbuf);
+    C2D_TextBufDelete(keyTextBuf);
     C2D_FontFree(font);
-    skinTextBuf = nullptr;
+    keyTextBuf = nullptr;
+    skinTextbuf = nullptr;
     font = nullptr;
     for(auto& img : keyboard)
         img.tex = nullptr;
@@ -86,6 +89,9 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
     const u32 kDown = hidKeysDown();
     const u32 kHeld = hidKeysHeld();
     hidTouchRead(&touch);
+    C2D_TextBufClear(skinTextbuf);
+    const std::string temp = std::format("{}, {}, {}, {}", camera.yaw, camera.position.x, camera.position.y, camera.position.z);
+    C2D_TextParse(&debugText, skinTextbuf, temp.c_str());
 
     for(int i = 0; i < NUMMENUS; i++) {
         if(menuButtons[i].touched(touch) && kDown & KEY_TOUCH) {
@@ -108,6 +114,7 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
 
 void UI::draw() {
     C2D_DrawRectSolid(60, 213, 0, 202, 27, C2D_Color32(0,0,0,255));
+    C2D_DrawText(&debugText, 0, 50, 30, 0, 1.f, 1.f);
     for(button& b : menuButtons)
         b.draw();
 
@@ -136,8 +143,8 @@ void UI::keyboardInput(Skin& skin) {
     constexpr rectI del(272, 162, 24, 31);
     if((touchedBox(touch, del) || kDown & KEY_B) && !cache.empty()) {
         cache.pop_back();
-        C2D_TextBufClear(skinTextBuf);
-        C2D_TextFontParse(&skinText, font, skinTextBuf, cache.c_str());
+        C2D_TextBufClear(keyTextBuf);
+        C2D_TextFontParse(&skinText, font, keyTextBuf, cache.c_str());
         C2D_TextOptimize(&skinText);
         return;
     }
@@ -160,8 +167,8 @@ void UI::keyboardInput(Skin& skin) {
     constexpr rectI underscore(272, 198, 24, 31);
     if(touchedBox(touch, underscore)) {
         cache += "_";
-        C2D_TextBufClear(skinTextBuf);
-        C2D_TextFontParse(&skinText, font, skinTextBuf, cache.c_str());
+        C2D_TextBufClear(keyTextBuf);
+        C2D_TextFontParse(&skinText, font, keyTextBuf, cache.c_str());
         C2D_TextOptimize(&skinText);
         return;
     }
@@ -169,8 +176,8 @@ void UI::keyboardInput(Skin& skin) {
     if(touch.py > keyboardOffset - 23 && touch.py < 57) {
         touchX -= 2;
         cache += keyboardLUT[touchX/30 + 52];
-        C2D_TextBufClear(skinTextBuf);
-        C2D_TextFontParse(&skinText, font, skinTextBuf, cache.c_str());
+        C2D_TextBufClear(keyTextBuf);
+        C2D_TextFontParse(&skinText, font, keyTextBuf, cache.c_str());
         C2D_TextOptimize(&skinText);
         return;
     }
@@ -194,8 +201,8 @@ void UI::keyboardInput(Skin& skin) {
     default:
         break;
     }
-    C2D_TextBufClear(skinTextBuf);
-    C2D_TextFontParse(&skinText, font, skinTextBuf, cache.c_str());
+    C2D_TextBufClear(keyTextBuf);
+    C2D_TextFontParse(&skinText, font, keyTextBuf, cache.c_str());
     C2D_TextOptimize(&skinText);
 }
 
@@ -210,8 +217,10 @@ void UI::cameraUpdate(Camera& camera) {
         if(camera.viewLock) {
             camera.position.y = 0.f;
             camera.resetAngle();
-            float angle = tanf(camera.position.y/camera.position.x);
-            camera.rotateCamera({angle, 0.f});
+            // camera.position = FVec3_New(0.f, 0.f, 1.f);
+            float angle = atan2f(camera.position.z+1.f,camera.position.x) * ( 180.f / M_PI);
+            if(angle < 0) angle += 360.f;
+            camera.rotateCamera({angle-90.f, 0.f});
         }
 
     }

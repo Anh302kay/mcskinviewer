@@ -63,8 +63,10 @@ private:
     C2D_SpriteSheet keyboardSpritesheet;
     C2D_SpriteSheet iconSpritesheet;
     C2D_Image keyboard[2];
-    C2D_TextBuf skinTextBuf;
+    C2D_TextBuf skinTextbuf;
+    C2D_TextBuf keyTextBuf;
     C2D_Font font;
     C2D_Text skinText;
+    C2D_Text debugText;
     touchPosition touch;
 };
