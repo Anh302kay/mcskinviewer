@@ -27,6 +27,7 @@ public:
     void resetAngle();
     C3D_Mtx getLookAt();
     void changeFOV(float fov) { Mtx_PerspTilt(&projection, C3D_AngleFromDegrees(fov), C3D_AspectRatioTop, 0.01f, 1000.f, false); }
+    const v2f getDelta() const { return v2f(touch.px - touchOld.px, touchOld.py - touch.py); }
 
 private:
     circlePosition cPad;

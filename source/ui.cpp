@@ -68,7 +68,8 @@ UI::UI() {
     menuButtons[MENU_CAMERA] = button({125, 215}, {27,27}, C2D_Color32(255,255,255,255), 20.f, v2f(1.f), v2f(1.f));
 
     cameraButtons[CAMERA_FREELOOK] = button(v2f(10.f), v2f(20.f));;
-    cameraButtons[CAMERA_TRACKPAD] = button(v2f(20.f), v2f(20.f));;
+    cameraButtons[CAMERA_TRACKPAD] = button(v2f(20, 100.f), v2f(280.f, 120.f));
+    cameraButtons[CAMERA_SCROLL] = button(v2f(50.f), v2f(20.f));;
 
 }
 
@@ -90,7 +91,7 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
     const u32 kHeld = hidKeysHeld();
     hidTouchRead(&touch);
     C2D_TextBufClear(skinTextbuf);
-    const std::string temp = std::format("{}, {}, {}, {}", camera.yaw, camera.position.x, camera.position.y, camera.position.z);
+    const std::string temp = std::format("{}, {}, {}", camera.yaw, camera.getDelta().x, camera.getDelta().y);
     C2D_TextParse(&debugText, skinTextbuf, temp.c_str());
 
     for(int i = 0; i < NUMMENUS; i++) {
@@ -105,7 +106,7 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
             keyboardInput(skin);
         break;
     case MENU_CAMERA:
-        cameraUpdate(camera);
+        cameraUpdate(camera, skinTransform);
         break;
     default:
         break;
@@ -114,7 +115,7 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
 
 void UI::draw() {
     C2D_DrawRectSolid(60, 213, 0, 202, 27, C2D_Color32(0,0,0,255));
-    C2D_DrawText(&debugText, 0, 50, 30, 0, 1.f, 1.f);
+    C2D_DrawText(&debugText, 0, 50, 30, 0, .5f, .5f);
     for(button& b : menuButtons)
         b.draw();
 
@@ -206,11 +207,17 @@ void UI::keyboardInput(Skin& skin) {
     C2D_TextOptimize(&skinText);
 }
 
-void UI::cameraUpdate(Camera& camera) {
+void UI::cameraUpdate(Camera& camera, Transform& skinTransform) {
     const u32 kDown = hidKeysDown();
     const u32 kHeld = hidKeysHeld();
+    const v2f touchDelta = camera.getDelta();
+
+    if(cameraButtons[CAMERA_SCROLL].touched(touch) && (kHeld & KEY_TOUCH)) {
+        camera.rotateCamera({0, touchDelta.y*30});
+    }
 
     if(!(kDown & KEY_TOUCH)) return;
+
     if(cameraButtons[CAMERA_FREELOOK].touched(touch)) {
         camera.viewLock = !camera.viewLock;
         camera.xLock = camera.viewLock;
@@ -224,6 +231,7 @@ void UI::cameraUpdate(Camera& camera) {
         }
 
     }
+
 
     
         // if(cameraButtons[i].touched(touch) && kDown & KEY_TOUCH) {
