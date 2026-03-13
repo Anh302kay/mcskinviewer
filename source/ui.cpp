@@ -68,7 +68,7 @@ UI::UI() {
     menuButtons[MENU_CAMERA] = button({125, 215}, {27,27}, C2D_Color32(255,255,255,255), 20.f, v2f(1.f), v2f(1.f));
 
     cameraButtons[CAMERA_FREELOOK] = button(v2f(10.f), v2f(20.f));;
-    cameraButtons[CAMERA_TRACKPAD] = button(v2f(20, 100.f), v2f(280.f, 120.f));
+    cameraButtons[CAMERA_TRACKPAD] = button(v2f(20, 80.f), v2f(280.f, 130.f));
     cameraButtons[CAMERA_SCROLL] = button(v2f(50.f), v2f(20.f));;
 
 }
@@ -213,7 +213,10 @@ void UI::cameraUpdate(Camera& camera, Transform& skinTransform) {
     const v2f touchDelta = camera.getDelta();
 
     if(cameraButtons[CAMERA_SCROLL].touched(touch) && (kHeld & KEY_TOUCH)) {
-        camera.rotateCamera({0, touchDelta.y*30});
+        camera.rotateCamera({0, touchDelta.y*0.7f});
+        float distance = std::hypotf(camera.position.z+1.f,camera.position.x);
+        camera.position.y = sinf(-camera.pitch * ( M_PI / 180.f)) * distance;
+        // camera.position.z = cosf(camera.pitch * ( M_PI / 180.f)) * distance;
     }
 
     if(!(kDown & KEY_TOUCH)) return;
@@ -229,8 +232,9 @@ void UI::cameraUpdate(Camera& camera, Transform& skinTransform) {
             if(angle < 0) angle += 360.f;
             camera.rotateCamera({angle-90.f, 0.f});
         }
-
     }
+
+    // camera.viewLock = (cameraButtons[CAMERA_TRACKPAD].touched(touch) && (kDown & KEY_TOUCH));
 
 
     

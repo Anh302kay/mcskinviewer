@@ -19,8 +19,10 @@ void Camera::update() {
             touchOld = touch;
             firstLook = false;
         }
+        touchDelta = v2f(touch.px - touchOld.px, touchOld.py - touch.py);
         if(!viewLock)
-            rotateCamera(v2f(touch.px - touchOld.px, touchOld.py - touch.py));
+            rotateCamera(touchDelta);
+        
         touchOld = touch;
     }
 
