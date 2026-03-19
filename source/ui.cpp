@@ -229,8 +229,12 @@ void UI::cameraUpdate(Camera& camera, Transform& skinTransform) {
             camera.resetAngle();
             // camera.position = FVec3_New(0.f, 0.f, 1.f);
             float angle = atan2f(camera.position.z+1.f,camera.position.x) * ( 180.f / M_PI);
+            float distance = std::hypotf(camera.position.z+1.f,camera.position.x);
             if(angle < 0) angle += 360.f;
-            camera.rotateCamera({angle-90.f, 0.f});
+            camera.position.x = 0.f;
+            camera.position.z = distance;
+            skinTransform.rotation.y + angle-90.f;
+            // camera.rotateCamera({angle-90.f, 0.f});
         }
     }
 
