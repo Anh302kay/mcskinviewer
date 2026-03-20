@@ -70,4 +70,5 @@ private:
     C2D_Text skinText;
     C2D_Text debugText;
     touchPosition touch;
+    // float cameraDistance = 0.f;
 };

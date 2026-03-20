@@ -80,6 +80,10 @@ void Camera::resetAngle() {
     pitch = 0.f;
     roll = 0.f;
     firstLook = true;
+    direction.x = cos(C3D_AngleFromDegrees(yaw)) * cos(C3D_AngleFromDegrees(pitch));
+    direction.y = sin(C3D_AngleFromDegrees(pitch));
+    direction.z = sin(C3D_AngleFromDegrees(yaw)) * cos(C3D_AngleFromDegrees(pitch));
+    front = FVec3_Normalize(direction);
 }
 
 C3D_Mtx Camera::getLookAt() {

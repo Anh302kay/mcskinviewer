@@ -91,7 +91,7 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
     const u32 kHeld = hidKeysHeld();
     hidTouchRead(&touch);
     C2D_TextBufClear(skinTextbuf);
-    const std::string temp = std::format("{}, {}, {}", camera.yaw, camera.getDelta().x, camera.getDelta().y);
+    const std::string temp = std::format("{}, {}, {}", camera.position.z+1, camera.getDelta().x, camera.getDelta().y);
     C2D_TextParse(&debugText, skinTextbuf, temp.c_str());
 
     for(int i = 0; i < NUMMENUS; i++) {
@@ -212,12 +212,13 @@ void UI::cameraUpdate(Camera& camera, Transform& skinTransform) {
     const u32 kHeld = hidKeysHeld();
     const v2f touchDelta = camera.getDelta();
 
-    if(cameraButtons[CAMERA_SCROLL].touched(touch) && (kHeld & KEY_TOUCH)) {
-        camera.rotateCamera({0, touchDelta.y*0.7f});
-        float distance = std::hypotf(camera.position.z+1.f,camera.position.x);
-        camera.position.y = sinf(-camera.pitch * ( M_PI / 180.f)) * distance;
-        // camera.position.z = cosf(camera.pitch * ( M_PI / 180.f)) * distance;
-    }
+    // if(cameraButtons[CAMERA_SCROLL].touched(touch) && (kDown & KEY_TOUCH)) cameraDistance = std::hypotf(camera.position.z+1,camera.position.y)-1.f;
+
+    // if(cameraButtons[CAMERA_SCROLL].touched(touch) && (kHeld & KEY_TOUCH)) {
+    //     camera.rotateCamera({0, touchDelta.y*0.7f});
+    //     camera.position.y = sinf(-camera.pitch * ( M_PI / 180.f)) * cameraDistance;
+    //     camera.position.z = cosf(camera.pitch * ( M_PI / 180.f)) * cameraDistance;
+    // }
 
     if(!(kDown & KEY_TOUCH)) return;
 
@@ -226,15 +227,15 @@ void UI::cameraUpdate(Camera& camera, Transform& skinTransform) {
         camera.xLock = camera.viewLock;
         if(camera.viewLock) {
             camera.position.y = 0.f;
-            camera.resetAngle();
             // camera.position = FVec3_New(0.f, 0.f, 1.f);
             float angle = atan2f(camera.position.z+1.f,camera.position.x) * ( 180.f / M_PI);
-            float distance = std::hypotf(camera.position.z+1.f,camera.position.x);
+            // cameraDistance = std::hypotf(camera.position.z+1,camera.position.x)-1.f;
             if(angle < 0) angle += 360.f;
-            camera.position.x = 0.f;
-            camera.position.z = distance;
-            skinTransform.rotation.y + angle-90.f;
-            // camera.rotateCamera({angle-90.f, 0.f});
+            // camera.position.x = 0.f;
+            // camera.position.z = cameraDistance;
+            // skinTransform.rotation.y += angle-90.f;
+            camera.resetAngle();
+            camera.rotateCamera({angle-90.f, 0.f});
         }
     }
 
