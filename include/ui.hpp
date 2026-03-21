@@ -48,6 +48,24 @@ enum {
     NUMCAMERABUTTONS = 3
 };
 
+enum {
+    VIS_HEAD,
+    VIS_TORSO,
+    VIS_LARM,
+    VIS_RARM,
+    VIS_LLEG,
+    VIS_RLEG,
+    VIS_HAT,
+    VIS_OTORSO,
+    VIS_OLARM,
+    VIS_ORARM,
+    VIS_OLLEG,
+    VIS_ORLEG,
+    VIS_LAYER1,
+    VIS_LAYER2,
+    NUMVISBUTTONS = 14
+};
+
 class UI {
 public:
     UI();
@@ -61,6 +79,7 @@ private:
     bool capsLock = false;
     button menuButtons[NUMMENUS];
     button cameraButtons[NUMCAMERABUTTONS];
+    button visButtons[NUMVISBUTTONS];
     C2D_SpriteSheet keyboardSpritesheet;
     C2D_SpriteSheet iconSpritesheet;
     C2D_Image keyboard[2];
@@ -70,5 +89,4 @@ private:
     C2D_Text skinText;
     C2D_Text debugText;
     touchPosition touch;
-    // float cameraDistance = 0.f;
 };

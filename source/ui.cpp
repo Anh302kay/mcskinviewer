@@ -67,9 +67,19 @@ UI::UI() {
 
     menuButtons[MENU_CAMERA] = button({125, 215}, {27,27}, C2D_Color32(255,255,255,255), 20.f, v2f(1.f), v2f(1.f));
 
-    cameraButtons[CAMERA_FREELOOK] = button(v2f(10.f), v2f(20.f));;
+    cameraButtons[CAMERA_FREELOOK] = button(v2f(10.f), v2f(20.f));
     cameraButtons[CAMERA_TRACKPAD] = button(v2f(20, 80.f), v2f(280.f, 130.f));
-    cameraButtons[CAMERA_SCROLL] = button(v2f(50.f), v2f(20.f));;
+    cameraButtons[CAMERA_SCROLL] = button(v2f(50.f), v2f(20.f));
+    for(int i = 0; i < 2; i++) {
+        const int xPos = 40;
+        visButtons[VIS_HEAD + i * 6] = button(v2f(xPos    + i*100.f, 10.f), v2f(20.f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_TORSO + i * 6] = button(v2f(xPos   + i*100.f, 32.f), v2f(20.f, 30.f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_LARM + i * 6] = button(v2f(xPos-12 + i*100.f, 32.f), v2f(10.f, 30.f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_RARM + i * 6] = button(v2f(xPos+22 + i*100.f, 32.f), v2f(10.f, 30.f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_LLEG + i * 6] = button(v2f(xPos    + i*100.f, 64.f), v2f(9.f , 30.f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_RLEG + i * 6] = button(v2f(xPos+11 + i*100.f, 64.f), v2f(9.f , 30.f), C2D_Color32(255,255,255,255), 2.f);
+    }
+
 
 }
 
@@ -123,6 +133,10 @@ void UI::draw() {
     case MENU_KEYBOARD:
         C2D_DrawImageAt(keyboard[capsLock], 0, 0, 0);
         C2D_DrawText(&skinText, C2D_WithColor | C2D_AtBaseline, 10, 25, 0, .8f, .8f, C2D_Color32(255,255,255,255));
+        break;
+    case MENU_VISIBILITY:
+        for(button& b : visButtons)
+            b.draw();
         break;
     case MENU_CAMERA:
         for(button& b : cameraButtons)
@@ -212,14 +226,6 @@ void UI::cameraUpdate(Camera& camera, Transform& skinTransform) {
     const u32 kHeld = hidKeysHeld();
     const v2f touchDelta = camera.getDelta();
 
-    // if(cameraButtons[CAMERA_SCROLL].touched(touch) && (kDown & KEY_TOUCH)) cameraDistance = std::hypotf(camera.position.z+1,camera.position.y)-1.f;
-
-    // if(cameraButtons[CAMERA_SCROLL].touched(touch) && (kHeld & KEY_TOUCH)) {
-    //     camera.rotateCamera({0, touchDelta.y*0.7f});
-    //     camera.position.y = sinf(-camera.pitch * ( M_PI / 180.f)) * cameraDistance;
-    //     camera.position.z = cosf(camera.pitch * ( M_PI / 180.f)) * cameraDistance;
-    // }
-
     if(!(kDown & KEY_TOUCH)) return;
 
     if(cameraButtons[CAMERA_FREELOOK].touched(touch)) {
@@ -227,13 +233,8 @@ void UI::cameraUpdate(Camera& camera, Transform& skinTransform) {
         camera.xLock = camera.viewLock;
         if(camera.viewLock) {
             camera.position.y = 0.f;
-            // camera.position = FVec3_New(0.f, 0.f, 1.f);
             float angle = atan2f(camera.position.z+1.f,camera.position.x) * ( 180.f / M_PI);
-            // cameraDistance = std::hypotf(camera.position.z+1,camera.position.x)-1.f;
             if(angle < 0) angle += 360.f;
-            // camera.position.x = 0.f;
-            // camera.position.z = cameraDistance;
-            // skinTransform.rotation.y += angle-90.f;
             camera.resetAngle();
             camera.rotateCamera({angle-90.f, 0.f});
         }
