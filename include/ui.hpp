@@ -51,19 +51,20 @@ enum {
 enum {
     VIS_HEAD,
     VIS_TORSO,
-    VIS_LARM,
     VIS_RARM,
-    VIS_LLEG,
+    VIS_LARM,
     VIS_RLEG,
+    VIS_LLEG,
     VIS_HAT,
     VIS_OTORSO,
-    VIS_OLARM,
     VIS_ORARM,
-    VIS_OLLEG,
+    VIS_OLARM,
     VIS_ORLEG,
+    VIS_OLLEG,
     VIS_LAYER1,
     VIS_LAYER2,
-    NUMVISBUTTONS = 14
+    NUMVISBUTTONS = 14,
+    SKINGRAPHICS=12
 };
 
 class UI {

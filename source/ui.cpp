@@ -115,6 +115,15 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
         if(kDown & KEY_TOUCH)
             keyboardInput(skin);
         break;
+    case MENU_VISIBILITY:
+        for(int i = 0; i < SKINGRAPHICS; i++) {
+            if(visButtons[i].touched(touch) && (kDown & KEY_TOUCH)) {
+                skin.visibility ^= 1 << i;
+                bool bit = (skin.visibility >> i) & 1;
+                visButtons[i].colour = bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255);
+            }
+        }
+        break;
     case MENU_CAMERA:
         cameraUpdate(camera, skinTransform);
         break;
