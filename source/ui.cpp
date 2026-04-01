@@ -72,12 +72,13 @@ UI::UI() {
     cameraButtons[CAMERA_SCROLL] = button(v2f(50.f), v2f(20.f));
     for(int i = 0; i < 2; i++) {
         const int xPos = 40;
-        visButtons[VIS_HEAD + i * 6] = button(v2f(xPos    + i*100.f, 10.f), v2f(20.f), C2D_Color32(255,255,255,255), 2.f);
-        visButtons[VIS_TORSO + i * 6] = button(v2f(xPos   + i*100.f, 32.f), v2f(20.f, 30.f), C2D_Color32(255,255,255,255), 2.f);
-        visButtons[VIS_LARM + i * 6] = button(v2f(xPos-12 + i*100.f, 32.f), v2f(10.f, 30.f), C2D_Color32(255,255,255,255), 2.f);
-        visButtons[VIS_RARM + i * 6] = button(v2f(xPos+22 + i*100.f, 32.f), v2f(10.f, 30.f), C2D_Color32(255,255,255,255), 2.f);
-        visButtons[VIS_LLEG + i * 6] = button(v2f(xPos    + i*100.f, 64.f), v2f(9.f , 30.f), C2D_Color32(255,255,255,255), 2.f);
-        visButtons[VIS_RLEG + i * 6] = button(v2f(xPos+11 + i*100.f, 64.f), v2f(9.f , 30.f), C2D_Color32(255,255,255,255), 2.f);
+        const int yPos = 10;
+        visButtons[VIS_HEAD + i * 6] = button(v2f(xPos    + i*100.f, yPos), v2f(20.f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_TORSO + i * 6] = button(v2f(xPos   + i*100.f, yPos+22), v2f(20.f, 30.f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_LARM + i * 6] = button(v2f(xPos-12 + i*100.f, yPos+22), v2f(10.f, 30.f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_RARM + i * 6] = button(v2f(xPos+22 + i*100.f, yPos+22), v2f(10.f, 30.f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_LLEG + i * 6] = button(v2f(xPos    + i*100.f, yPos+54), v2f(9.f , 30.f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_RLEG + i * 6] = button(v2f(xPos+11 + i*100.f, yPos+54), v2f(9.f , 30.f), C2D_Color32(255,255,255,255), 2.f);
     }
 
 
