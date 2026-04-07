@@ -72,7 +72,7 @@ UI::UI() {
     cameraButtons[CAMERA_SCROLL] = button(v2f(50.f), v2f(20.f));
     for(int i = 0; i < 2; i++) {
         const int xPos = 40;
-        const int yPos = 10;
+        const int yPos = 30;
         visButtons[VIS_HEAD + i * 6] = button(v2f(xPos    + i*100.f, yPos), v2f(20.f), C2D_Color32(255,255,255,255), 2.f);
         visButtons[VIS_TORSO + i * 6] = button(v2f(xPos   + i*100.f, yPos+22), v2f(20.f, 30.f), C2D_Color32(255,255,255,255), 2.f);
         visButtons[VIS_LARM + i * 6] = button(v2f(xPos-12 + i*100.f, yPos+22), v2f(10.f, 30.f), C2D_Color32(255,255,255,255), 2.f);
@@ -81,7 +81,11 @@ UI::UI() {
         visButtons[VIS_RLEG + i * 6] = button(v2f(xPos+11 + i*100.f, yPos+54), v2f(9.f , 30.f), C2D_Color32(255,255,255,255), 2.f);
     }
 
+    visButtons[VIS_LAYER1] = button(v2f(70, 160), v2f(20,20));
+    visButtons[VIS_LAYER2] = button(v2f(110, 160), v2f(20,20));
 
+    C2D_TextFontParse(&uiText[0], font, skinTextbuf, "First Layer");
+    C2D_TextFontParse(&uiText[1], font, skinTextbuf, "Second Layer");
 }
 
 UI::~UI() {
@@ -101,9 +105,10 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
     const u32 kDown = hidKeysDown();
     const u32 kHeld = hidKeysHeld();
     hidTouchRead(&touch);
-    C2D_TextBufClear(skinTextbuf);
-    const std::string temp = std::format("{}, {}, {}", camera.position.z+1, camera.getDelta().x, camera.getDelta().y);
-    C2D_TextParse(&debugText, skinTextbuf, temp.c_str());
+    // C2D_TextBufClear(skinTextbuf);
+    // const std::string temp = std::format("{}, {}, {}", camera.position.z+1, camera.getDelta().x, camera.getDelta().y);
+    // C2D_TextParse(&debugText, skinTextbuf, temp.c_str());
+
 
     for(int i = 0; i < NUMMENUS; i++) {
         if(menuButtons[i].touched(touch) && kDown & KEY_TOUCH) {
@@ -124,6 +129,23 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
                 visButtons[i].colour = bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255);
             }
         }
+        if(kDown & KEY_TOUCH) {
+            if(visButtons[VIS_LAYER1].touched(touch)) {
+                skin.layerToggle[0] = !skin.layerToggle[0];
+                for(int i = 0; i < 6; i++) {
+                    bool bit = (skin.visibility >> i) & 1;
+                    visButtons[i].colour = skin.layerToggle[0] ? bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255) : C2D_Color32(96,96,96,255);
+                }
+            }
+
+            if(visButtons[VIS_LAYER2].touched(touch)) {
+                skin.layerToggle[1] = !skin.layerToggle[1];
+                for(int i = 0; i < 6; i++) {
+                    bool bit = (skin.visibility >> (i+6)) & 1;
+                    visButtons[i+6].colour = skin.layerToggle[1] ? bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255) : C2D_Color32(96,96,96,255);
+                }
+            }
+        }
         break;
     case MENU_CAMERA:
         cameraUpdate(camera, skinTransform);
@@ -135,7 +157,7 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
 
 void UI::draw() {
     C2D_DrawRectSolid(60, 213, 0, 202, 27, C2D_Color32(0,0,0,255));
-    C2D_DrawText(&debugText, 0, 50, 30, 0, .5f, .5f);
+    // C2D_DrawText(&debugText, 0, 50, 30, 0, .5f, .5f);
     for(button& b : menuButtons)
         b.draw();
 
@@ -147,6 +169,8 @@ void UI::draw() {
     case MENU_VISIBILITY:
         for(button& b : visButtons)
             b.draw();
+        C2D_DrawText(&uiText[0], C2D_WithColor, 10, 10, 0, .5f, .5f, C2D_Color32(255,255,255,255));
+        C2D_DrawText(&uiText[1], C2D_WithColor, 100, 10, 0, .5f, .5f, C2D_Color32(255,255,255,255));
         break;
     case MENU_CAMERA:
         for(button& b : cameraButtons)
@@ -249,21 +273,4 @@ void UI::cameraUpdate(Camera& camera, Transform& skinTransform) {
             camera.rotateCamera({angle-90.f, 0.f});
         }
     }
-
-    // camera.viewLock = (cameraButtons[CAMERA_TRACKPAD].touched(touch) && (kDown & KEY_TOUCH));
-
-
-    
-        // if(cameraButtons[i].touched(touch) && kDown & KEY_TOUCH) {
-        //     switch(i) {
-        //     case CAMERA_FREELOOK:
-        //         camera.viewLock = !camera.viewLock;
-        //         camera.xLock = !camera.xLock;
-        //         break;
-        //     case CAMERA_TRACKPAD:
-        //         break;
-        //     default:
-        //         break;
-        //     }
-        // }
 }

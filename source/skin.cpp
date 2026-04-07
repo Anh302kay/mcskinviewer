@@ -82,10 +82,13 @@ void Skin::renderSkin(std::array<Mesh, 6>& skin1) {
 void Skin::renderSkin(std::array<Mesh, 6>& skin1, std::array<Mesh, 6>& skin2) {
     constexpr u16 layer1[] = { TORSO, HEAD, LARM, LLEG, RARM, RLEG };
     constexpr u16 layer2[] = { OTORSO, HAT, OLARM, OLLEG, ORARM, ORLEG };
+    if(layerToggle[0])
     for(int i = 0; i < 6; i++) {
         if(visibility & layer1[i])
             skin1[i].render();
     }
+    
+    if(layerToggle[1])
     for(int i = 0; i < 6; i++) {
         if(visibility & layer2[i])
             skin2[i].render();

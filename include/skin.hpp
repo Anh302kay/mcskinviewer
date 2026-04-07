@@ -57,6 +57,7 @@ public:
     CURL* curl = NULL;
     skinType type;
     u16 visibility = FULL_SKIN;
+    bool layerToggle[2] = {true, true};
     std::string name;
 private:
     void renderSkin(std::array<Mesh, 6>& skin1);
