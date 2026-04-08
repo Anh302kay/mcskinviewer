@@ -25,8 +25,10 @@ Mesh::Mesh(const std::string& obj) {
 }
 
 Mesh::~Mesh() {
+    if(meshData != nullptr)
     linearFree(meshData);
     meshData = nullptr;
+    if(indices != nullptr)
     linearFree(indices);
     indices = nullptr;
 }

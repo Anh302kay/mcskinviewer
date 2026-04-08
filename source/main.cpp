@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
         camera.update();
 		ui->update(skin, skinTransform, camera);
         
-        if(camera.viewLock)
+        if(camera.viewLock && camera.deadZoneX())
 		    skinTransform.rotation.y -= cPad.dx / 96.f;
 
         const C3D_Mtx lookAt = camera.getLookAt();
@@ -108,9 +108,10 @@ int main(int argc, char* argv[]) {
 
 		C3D_FrameEnd(0);
     }
-
+    skin.cleanup();
     socExit();
     free(soc_sharedmem);
+    soc_sharedmem = nullptr;
     C2D_Fini();
 	C3D_Fini();
     gfxExit();

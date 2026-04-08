@@ -47,12 +47,17 @@ Skin::Skin() {
 	C3D_TexSetWrap(&skin, GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
 }
 
-Skin::~Skin() {
-    curl_easy_cleanup(curl);
-    curl = NULL;
+void Skin::cleanup() {
+    if(curl != nullptr) {
+        curl_easy_cleanup(curl);
+        curl = nullptr;
+    } 
     skin.height = 64;
     skin.size = 4000;
-    C3D_TexDelete(&skin);
+    if(skin.data != nullptr) {
+        C3D_TexDelete(&skin);
+        skin.data = nullptr;
+    }
 }
 
 void Skin::initModels() {

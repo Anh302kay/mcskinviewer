@@ -28,6 +28,8 @@ public:
     C3D_Mtx getLookAt();
     void changeFOV(float fov) { Mtx_PerspTilt(&projection, C3D_AngleFromDegrees(fov), C3D_AspectRatioTop, 0.01f, 1000.f, false); }
     const v2f getDelta() const { return touchDelta; }
+    bool deadZoneX() { return cPad.dx > cPadDeadzone || cPad.dx < -cPadDeadzone; }
+    bool deadZoneY() { return cPad.dy > cPadDeadzone || cPad.dy < -cPadDeadzone; }
 
 private:
     circlePosition cPad;

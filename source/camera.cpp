@@ -26,27 +26,27 @@ void Camera::update() {
         touchOld = touch;
     }
 
-    const C3D_FVec baseUp = FVec3_New(0, 1, 0);
-    if (kHeld & KEY_L && kHeld & KEY_R) {
-        roll = 0.f;
-        up = FVec3_New(0, 1, 0);
-    }
-    else if(kHeld & KEY_R) {
-        roll -= 5.f;
-        C3D_Mtx rollMtx;
-        Mtx_Identity(&rollMtx);
-        Mtx_Rotate(&rollMtx, FVec3_Normalize(direction), C3D_AngleFromDegrees(roll), false);
-        up = Mtx_MultiplyFVec3(&rollMtx, baseUp);
-        // up = FVec3_Normalize(up);
-    }
-    else if(kHeld & KEY_L) {
-        roll += 5.f;
-        C3D_Mtx rollMtx;
-        Mtx_Identity(&rollMtx);
-        Mtx_Rotate(&rollMtx, FVec3_Normalize(direction), C3D_AngleFromDegrees(roll), false);
-        up = Mtx_MultiplyFVec3(&rollMtx, baseUp);
-        // up = FVec3_Normalize(up);
-    }
+    // const C3D_FVec baseUp = FVec3_New(0, 1, 0);
+    // if (kHeld & KEY_L && kHeld & KEY_R) {
+    //     roll = 0.f;
+    //     up = FVec3_New(0, 1, 0);
+    // }
+    // else if(kHeld & KEY_R) {
+    //     roll -= 5.f;
+    //     C3D_Mtx rollMtx;
+    //     Mtx_Identity(&rollMtx);
+    //     Mtx_Rotate(&rollMtx, FVec3_Normalize(direction), C3D_AngleFromDegrees(roll), false);
+    //     up = Mtx_MultiplyFVec3(&rollMtx, baseUp);
+    //     // up = FVec3_Normalize(up);
+    // }
+    // else if(kHeld & KEY_L) {
+    //     roll += 5.f;
+    //     C3D_Mtx rollMtx;
+    //     Mtx_Identity(&rollMtx);
+    //     Mtx_Rotate(&rollMtx, FVec3_Normalize(direction), C3D_AngleFromDegrees(roll), false);
+    //     up = Mtx_MultiplyFVec3(&rollMtx, baseUp);
+    //     // up = FVec3_Normalize(up);
+    // }
 
 	if(cPad.dy > cPadDeadzone || cPad.dy < -cPadDeadzone) {
 		position = FVec3_Add(position, FVec3_Scale(front, cameraSpeed * (float)((float)cPad.dy/154.f)));

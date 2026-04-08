@@ -46,7 +46,7 @@ enum {
 class Skin {
 public:
     Skin();
-    ~Skin();
+    void cleanup();
     static void initModels();
     void download(const std::string& p_name);
     void use();

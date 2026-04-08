@@ -76,6 +76,7 @@ public:
 private:
     void keyboardInput(Skin& skin);
     void cameraUpdate(Camera& camera, Transform& skinTransform);
+    void visUpdate(Skin& skin);
     u8 mode = MENU_KEYBOARD;
     bool capsLock = false;
     button menuButtons[NUMMENUS];

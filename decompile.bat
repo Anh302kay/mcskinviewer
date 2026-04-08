@@ -1,0 +1,1 @@
+E:\msys64\opt\devkitpro\devkitARM\bin\arm-none-eabi-objdump.exe -D mcskinviewer.elf > decomp.txt
