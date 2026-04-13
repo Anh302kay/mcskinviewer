@@ -67,12 +67,18 @@ enum {
     SKINGRAPHICS=12
 };
 
+enum {
+    UI_FIRSTLAYER=0,
+    UI_SECONDLAYER=1,
+    NUMUITEXT=2
+};
+
 class UI {
 public:
     UI();
     ~UI();
     void update(Skin& skin, Transform& skinTransform, Camera& camera);
-    void draw();
+    void draw(Skin& skin);
 private:
     void keyboardInput(Skin& skin);
     void cameraUpdate(Camera& camera, Transform& skinTransform);

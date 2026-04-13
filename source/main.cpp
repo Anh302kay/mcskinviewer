@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
 		C2D_SceneTarget(bottom);
 		C2D_Prepare();
 
-		ui->draw();
+		ui->draw(skin);
 		C2D_Flush();
 
 		C3D_FrameEnd(0);

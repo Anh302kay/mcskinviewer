@@ -2,6 +2,7 @@
 #include <3ds.h>
 #include <citro3d.h>
 #include <citro2d.h>
+#include <ranges>
 
 #include "ui.hpp"
 #include "utils.hpp"
@@ -15,18 +16,16 @@ static constexpr bool touchedBox(const touchPosition& touch, const rectI& rect) 
     return touch.px > rect.x && touch.px < rect.x + rect.w && touch.py > rect.y && touch.py < rect.y + rect.h;
 }
 
-static constexpr void setSkinControls(button visButtons[NUMVISBUTTONS], float ratio) {
+static constexpr void setSkinControls(button visButtons[NUMVISBUTTONS], const int xPos, const int yPos, float ratio) {
     for(int i = 0; i < 2; i++) {
-    constexpr int xPos = 60;
-    constexpr int yPos = 30;
-    constexpr float width = 30.f;
-    visButtons[VIS_HEAD + i * 6] = button(v2f(xPos    + i*180.f, yPos), v2f(width), C2D_Color32(255,255,255,255), 2.f);
-    visButtons[VIS_TORSO + i * 6] = button(v2f(xPos   + i*180.f, yPos+width+2), v2f(width, width*1.5f), C2D_Color32(255,255,255,255), 2.f);
-    visButtons[VIS_LARM + i * 6] = button(v2f(xPos-width/ratio-2 + i*180.f, yPos+width+2), v2f(width/ratio, width*1.5f), C2D_Color32(255,255,255,255), 2.f);
-    visButtons[VIS_RARM + i * 6] = button(v2f(xPos+width+2 + i*180.f, yPos+width+2), v2f(width/ratio, width*1.5f), C2D_Color32(255,255,255,255), 2.f);
-    visButtons[VIS_LLEG + i * 6] = button(v2f(xPos    + i*180.f, yPos+width*2.5+4), v2f(width/2-1 , width*1.5f), C2D_Color32(255,255,255,255), 2.f);
-    visButtons[VIS_RLEG + i * 6] = button(v2f(xPos+width/2+1 + i*180.f, yPos+width*2.5+4), v2f(width/2-1 , width*1.5f), C2D_Color32(255,255,255,255), 2.f);
-}
+        constexpr float width = 30.f;
+        visButtons[VIS_HEAD + i * 6] = button(v2f(xPos    + i*160.f, yPos), v2f(width), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_TORSO + i * 6] = button(v2f(xPos   + i*160.f, yPos+width+2), v2f(width, width*1.5f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_LARM + i * 6] = button(v2f(xPos-width/ratio-2 + i*160.f, yPos+width+2), v2f(width/ratio, width*1.5f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_RARM + i * 6] = button(v2f(xPos+width+2 + i*160.f, yPos+width+2), v2f(width/ratio, width*1.5f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_LLEG + i * 6] = button(v2f(xPos    + i*160.f, yPos+width*2.5+4), v2f(width/2-1 , width*1.5f), C2D_Color32(255,255,255,255), 2.f);
+        visButtons[VIS_RLEG + i * 6] = button(v2f(xPos+width/2+1 + i*160.f, yPos+width*2.5+4), v2f(width/2-1 , width*1.5f), C2D_Color32(255,255,255,255), 2.f);
+    }
 }
 
 const char* keyboardLUT = { "qwertyuiopasdfghjklzxcvbnm"
@@ -66,6 +65,11 @@ void button::draw() {
     }
 }
 
+constexpr const char* uiTextLookup[] {
+    "First Layer",
+    "Second Layer"
+};
+
 UI::UI() {
     keyboardSpritesheet = C2D_SpriteSheetLoad("romfs:/gfx/keyboard.t3x");
     iconSpritesheet = C2D_SpriteSheetLoad("romfs:/gfx/icons.t3x");
@@ -76,21 +80,20 @@ UI::UI() {
     font = C2D_FontLoad("romfs:/gfx/Minecraft.bcfnt");
 
     menuButtons[MENU_KEYBOARD] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 1), {65, 215}, {27,27}, C2D_Color32(255,255,255,255), 0.f, v2f(1.f), v2f(1.f));
-
     menuButtons[MENU_VISIBILITY] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 0), {95, 215}, {27,27}, C2D_Color32(255,255,255,255), 0.f, v2f(1.f), v2f(1.f));
-
     menuButtons[MENU_CAMERA] = button({125, 215}, {27,27}, C2D_Color32(255,255,255,255), 20.f, v2f(1.f), v2f(1.f));
 
     cameraButtons[CAMERA_FREELOOK] = button(v2f(10.f), v2f(20.f));
     cameraButtons[CAMERA_TRACKPAD] = button(v2f(20, 80.f), v2f(280.f, 130.f));
     cameraButtons[CAMERA_SCROLL] = button(v2f(50.f), v2f(20.f));
-    setSkinControls(visButtons, 2);
 
-    visButtons[VIS_LAYER1] = button(v2f(90, 160), v2f(20,20));
-    visButtons[VIS_LAYER2] = button(v2f(110, 160), v2f(20,20));
+    setSkinControls(visButtons, 65, 30, 2);
+    visButtons[VIS_LAYER1] = button(v2f(70, 160), v2f(20,20));
+    visButtons[VIS_LAYER2] = button(v2f(230, 160), v2f(20,20));
+    for(auto [i, text] : std::views::enumerate(uiText))
+        C2D_TextFontParse(&text, font, skinTextbuf, uiTextLookup[i]);
+    
 
-    C2D_TextFontParse(&uiText[0], font, skinTextbuf, "First Layer");
-    C2D_TextFontParse(&uiText[1], font, skinTextbuf, "Second Layer");
 }
 
 UI::~UI() {
@@ -137,7 +140,8 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
     }
 }
 
-void UI::draw() {
+void UI::draw(Skin& skin) {
+    constexpr u32 white = C2D_Color32(255,255,255,255);
     C2D_DrawRectSolid(60, 213, 0, 202, 27, C2D_Color32(0,0,0,255));
     // C2D_DrawText(&debugText, 0, 50, 30, 0, .5f, .5f);
     for(button& b : menuButtons)
@@ -146,13 +150,23 @@ void UI::draw() {
     switch (mode) {
     case MENU_KEYBOARD:
         C2D_DrawImageAt(keyboard[capsLock], 0, 0, 0);
-        C2D_DrawText(&skinText, C2D_WithColor | C2D_AtBaseline, 10, 25, 0, .8f, .8f, C2D_Color32(255,255,255,255));
+        C2D_DrawText(&skinText, C2D_WithColor | C2D_AtBaseline, 10, 25, 0, .8f, .8f, white);
         break;
     case MENU_VISIBILITY:
         for(button& b : visButtons)
             b.draw();
-        C2D_DrawText(&uiText[0], C2D_WithColor, 35, 10, 0, .5f, .5f, C2D_Color32(255,255,255,255));
-        C2D_DrawText(&uiText[1], C2D_WithColor, 210, 10, 0, .5f, .5f, C2D_Color32(255,255,255,255));
+        switch(skin.type) {
+            case SKIN_SLIM:
+            case SKIN_WIDE:
+                C2D_DrawText(&uiText[0], C2D_WithColor, 40, 10, 0, .5f, .5f, white);
+                C2D_DrawText(&uiText[1], C2D_WithColor, 195, 10, 0, .5f, .5f, white);
+                C2D_DrawLine(160, 10, white, 160, 160, white, 2, 0);
+                break;
+            case SKIN_CLASSIC:
+                C2D_DrawText(&uiText[0], C2D_WithColor, 120, 10, 0, .5f, .5f, white);
+                break;
+        }
+
         break;
     case MENU_CAMERA:
         for(button& b : cameraButtons)
@@ -191,15 +205,17 @@ void UI::keyboardInput(Skin& skin) {
         skin.download(cache);
         switch(skin.type) {
             case SKIN_CLASSIC:
+                setSkinControls(visButtons, 145, 30, 2);
+
                 for(int i = 0; i < 6; i++)
                     visButtons[i+6].pos.y = 240;
 
             break;
             case SKIN_WIDE:
-                setSkinControls(visButtons, 2);
+                setSkinControls(visButtons, 65, 30, 2);
                 break;
             case SKIN_SLIM:
-                setSkinControls(visButtons, 2.5f);
+                setSkinControls(visButtons, 65, 30, 2.5f);
                 break;
         }
         return;
@@ -271,13 +287,34 @@ void UI::cameraUpdate(Camera& camera, Transform& skinTransform) {
 
 void UI::visUpdate(Skin& skin) {
     const u32 kDown = hidKeysDown();
-    for(int i = 0; i < SKINGRAPHICS; i++) {
-        if(visButtons[i].touched(touch) && (kDown & KEY_TOUCH)) {
-            skin.visibility ^= 1 << i;
-            bool bit = (skin.visibility >> i) & 1;
-            visButtons[i].colour = bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255);
+    if(!skin.layerToggle[0]) {
+        for(int i = 0; i < 6; i++) {
+            if(visButtons[i+6].touched(touch) && (kDown & KEY_TOUCH)) {
+                skin.visibility ^= 1 << i+6;
+                bool bit = (skin.visibility >> i+6) & 1;
+                visButtons[i+6].colour = bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255);
+            }
         }
     }
+    if(!skin.layerToggle[1]) {
+        for(int i = 0; i < 6; i++) {
+            if(visButtons[i].touched(touch) && (kDown & KEY_TOUCH)) {
+                skin.visibility ^= 1 << i;
+                bool bit = (skin.visibility >> i) & 1;
+                visButtons[i].colour = bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255);
+            }
+        }
+    }
+    if(skin.layerToggle[0] && skin.layerToggle[1]) {
+        for(int i = 0; i < SKINGRAPHICS; i++) {
+            if(visButtons[i].touched(touch) && (kDown & KEY_TOUCH)) {
+                skin.visibility ^= 1 << i;
+                bool bit = (skin.visibility >> i) & 1;
+                visButtons[i].colour = bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255);
+            }
+        }
+    }
+
 
     if(kDown & KEY_TOUCH) {
         if(visButtons[VIS_LAYER1].touched(touch)) {
