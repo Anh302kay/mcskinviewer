@@ -67,7 +67,8 @@ void button::draw() {
 
 constexpr const char* uiTextLookup[] {
     "First Layer",
-    "Second Layer"
+    "Second Layer",
+    "Press A to enable freelook"
 };
 
 UI::UI() {
@@ -83,13 +84,13 @@ UI::UI() {
     menuButtons[MENU_VISIBILITY] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 0), {95, 215}, {27,27}, C2D_Color32(255,255,255,255), 0.f, v2f(1.f), v2f(1.f));
     menuButtons[MENU_CAMERA] = button({125, 215}, {27,27}, C2D_Color32(255,255,255,255), 20.f, v2f(1.f), v2f(1.f));
 
-    cameraButtons[CAMERA_FREELOOK] = button(v2f(10.f), v2f(20.f));
-    cameraButtons[CAMERA_TRACKPAD] = button(v2f(20, 80.f), v2f(280.f, 130.f));
-    cameraButtons[CAMERA_SCROLL] = button(v2f(50.f), v2f(20.f));
+    cameraButtons[CAMERA_TRACKPAD] = button(v2f(20.f, 10.f), v2f(280.f, 193.f));
 
     setSkinControls(visButtons, 65, 30, 2);
-    visButtons[VIS_LAYER1] = button(v2f(70, 160), v2f(20,20));
-    visButtons[VIS_LAYER2] = button(v2f(230, 160), v2f(20,20));
+    // visButtons[VIS_LAYER1] = button(v2f(70, 160), v2f(20,20));
+    // visButtons[VIS_LAYER2] = button(v2f(230, 160), v2f(20,20));
+    visButtons[VIS_LAYER1] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 4), v2f(58.5, 160), v2f(45,23), 0);
+    visButtons[VIS_LAYER2] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 4), v2f(218.5, 160), v2f(45,23), 0);
     for(auto [i, text] : std::views::enumerate(uiText))
         C2D_TextFontParse(&text, font, skinTextbuf, uiTextLookup[i]);
     
@@ -117,6 +118,18 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
     // const std::string temp = std::format("{}, {}, {}", camera.position.z+1, camera.getDelta().x, camera.getDelta().y);
     // C2D_TextParse(&debugText, skinTextbuf, temp.c_str());
 
+    if(kDown & KEY_A) {
+        camera.viewLock = !camera.viewLock;
+        camera.xLock = camera.viewLock;
+        if(camera.viewLock) {
+            camera.position.y = 0.f;
+            float angle = atan2f(camera.position.z+1.f,camera.position.x) * ( 180.f / M_PI);
+            if(angle < 0) angle += 360.f;
+            camera.resetAngle();
+            camera.rotateCamera({angle-90.f, 0.f});
+        }
+    }
+
 
     for(int i = 0; i < NUMMENUS; i++) {
         if(menuButtons[i].touched(touch) && kDown & KEY_TOUCH) {
@@ -142,6 +155,7 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
 
 void UI::draw(Skin& skin) {
     constexpr u32 white = C2D_Color32(255,255,255,255);
+    constexpr u32 grey = C2D_Color32(128,128,128,255);
     C2D_DrawRectSolid(60, 213, 0, 202, 27, C2D_Color32(0,0,0,255));
     // C2D_DrawText(&debugText, 0, 50, 30, 0, .5f, .5f);
     for(button& b : menuButtons)
@@ -158,8 +172,8 @@ void UI::draw(Skin& skin) {
         switch(skin.type) {
             case SKIN_SLIM:
             case SKIN_WIDE:
-                C2D_DrawText(&uiText[0], C2D_WithColor, 40, 10, 0, .5f, .5f, white);
-                C2D_DrawText(&uiText[1], C2D_WithColor, 195, 10, 0, .5f, .5f, white);
+                C2D_DrawText(&uiText[0], C2D_WithColor,  40, 10, 0, .5f, .5f, skin.layerToggle[0] ? white : grey);
+                C2D_DrawText(&uiText[1], C2D_WithColor, 195, 10, 0, .5f, .5f, skin.layerToggle[1] ? white : grey);
                 C2D_DrawLine(160, 10, white, 160, 160, white, 2, 0);
                 break;
             case SKIN_CLASSIC:
@@ -171,6 +185,8 @@ void UI::draw(Skin& skin) {
     case MENU_CAMERA:
         for(button& b : cameraButtons)
             b.draw();
+
+        C2D_DrawText(&uiText[UI_FREELOOK], C2D_WithColor | C2D_AlignCenter, 160, 106.5, 0, 0.5f, 0.5f, white);
         break;
     default:
         break;
@@ -206,16 +222,21 @@ void UI::keyboardInput(Skin& skin) {
         switch(skin.type) {
             case SKIN_CLASSIC:
                 setSkinControls(visButtons, 145, 30, 2);
-
+                visButtons[VIS_LAYER1].pos = v2f(138.5, 160);
+                visButtons[VIS_LAYER2].pos = v2f(230, 240);
                 for(int i = 0; i < 6; i++)
                     visButtons[i+6].pos.y = 240;
 
             break;
             case SKIN_WIDE:
                 setSkinControls(visButtons, 65, 30, 2);
+                visButtons[VIS_LAYER1].pos = v2f(58.5, 160);
+                visButtons[VIS_LAYER2].pos = v2f(218.5, 160);
                 break;
             case SKIN_SLIM:
                 setSkinControls(visButtons, 65, 30, 2.5f);
+                visButtons[VIS_LAYER1].pos = v2f(58.5, 160);
+                visButtons[VIS_LAYER2].pos = v2f(218.5, 160);
                 break;
         }
         return;
@@ -272,27 +293,31 @@ void UI::cameraUpdate(Camera& camera, Transform& skinTransform) {
 
     if(!(kDown & KEY_TOUCH)) return;
 
-    if(cameraButtons[CAMERA_FREELOOK].touched(touch)) {
-        camera.viewLock = !camera.viewLock;
-        camera.xLock = camera.viewLock;
-        if(camera.viewLock) {
-            camera.position.y = 0.f;
-            float angle = atan2f(camera.position.z+1.f,camera.position.x) * ( 180.f / M_PI);
-            if(angle < 0) angle += 360.f;
-            camera.resetAngle();
-            camera.rotateCamera({angle-90.f, 0.f});
-        }
-    }
+    // if(cameraButtons[CAMERA_FREELOOK].touched(touch)) {
+    //     camera.viewLock = !camera.viewLock;
+    //     camera.xLock = camera.viewLock;
+    //     if(camera.viewLock) {
+    //         camera.position.y = 0.f;
+    //         float angle = atan2f(camera.position.z+1.f,camera.position.x) * ( 180.f / M_PI);
+    //         if(angle < 0) angle += 360.f;
+    //         camera.resetAngle();
+    //         camera.rotateCamera({angle-90.f, 0.f});
+    //     }
+    // }
 }
 
 void UI::visUpdate(Skin& skin) {
     const u32 kDown = hidKeysDown();
+    constexpr u32 white = C2D_Color32(255,255,255,255);
+    constexpr u32 grey = C2D_Color32(128,128,128,255);
+    constexpr u32 darkGrey = C2D_Color32(96,96,96,255);
+
     if(!skin.layerToggle[0]) {
         for(int i = 0; i < 6; i++) {
             if(visButtons[i+6].touched(touch) && (kDown & KEY_TOUCH)) {
-                skin.visibility ^= 1 << i+6;
-                bool bit = (skin.visibility >> i+6) & 1;
-                visButtons[i+6].colour = bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255);
+                skin.visibility ^= 1 << (i+6);
+                bool bit = (skin.visibility >> (i+6)) & 1;
+                visButtons[i+6].colour = bit ? white : grey;
             }
         }
     }
@@ -301,7 +326,7 @@ void UI::visUpdate(Skin& skin) {
             if(visButtons[i].touched(touch) && (kDown & KEY_TOUCH)) {
                 skin.visibility ^= 1 << i;
                 bool bit = (skin.visibility >> i) & 1;
-                visButtons[i].colour = bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255);
+                visButtons[i].colour = bit ? white : grey;
             }
         }
     }
@@ -310,7 +335,7 @@ void UI::visUpdate(Skin& skin) {
             if(visButtons[i].touched(touch) && (kDown & KEY_TOUCH)) {
                 skin.visibility ^= 1 << i;
                 bool bit = (skin.visibility >> i) & 1;
-                visButtons[i].colour = bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255);
+                visButtons[i].colour = bit ? white : grey;
             }
         }
     }
@@ -321,16 +346,18 @@ void UI::visUpdate(Skin& skin) {
             skin.layerToggle[0] = !skin.layerToggle[0];
             for(int i = 0; i < 6; i++) {
                 bool bit = (skin.visibility >> i) & 1;
-                visButtons[i].colour = skin.layerToggle[0] ? bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255) : C2D_Color32(96,96,96,255);
+                visButtons[i].colour = skin.layerToggle[0] ? bit ? white : grey : darkGrey;
             }
+            visButtons[VIS_LAYER1].img = C2D_SpriteSheetGetImage(iconSpritesheet, 3+skin.layerToggle[0]);
         }
 
         if(visButtons[VIS_LAYER2].touched(touch)) {
             skin.layerToggle[1] = !skin.layerToggle[1];
             for(int i = 0; i < 6; i++) {
                 bool bit = (skin.visibility >> (i+6)) & 1;
-                visButtons[i+6].colour = skin.layerToggle[1] ? bit ? C2D_Color32(255,255,255,255) : C2D_Color32(128,128,128,255) : C2D_Color32(96,96,96,255);
+                visButtons[i+6].colour = skin.layerToggle[1] ? bit ? white : grey : darkGrey;
             }
+            visButtons[VIS_LAYER2].img = C2D_SpriteSheetGetImage(iconSpritesheet, 3+skin.layerToggle[1]);
         }
     }
 }

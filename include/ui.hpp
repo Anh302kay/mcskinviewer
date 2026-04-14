@@ -42,10 +42,8 @@ enum {
 };
 
 enum {
-    CAMERA_FREELOOK,
     CAMERA_TRACKPAD,
-    CAMERA_SCROLL,
-    NUMCAMERABUTTONS = 3
+    NUMCAMERABUTTONS = 1
 };
 
 enum {
@@ -69,8 +67,9 @@ enum {
 
 enum {
     UI_FIRSTLAYER=0,
-    UI_SECONDLAYER=1,
-    NUMUITEXT=2
+    UI_SECONDLAYER,
+    UI_FREELOOK,
+    NUMUITEXT=3
 };
 
 class UI {
@@ -94,7 +93,7 @@ private:
     C2D_TextBuf skinTextbuf;
     C2D_TextBuf keyTextBuf;
     C2D_Font font;
-    C2D_Text uiText[2];
+    C2D_Text uiText[NUMUITEXT];
     C2D_Text skinText;
     C2D_Text debugText;
     touchPosition touch;
