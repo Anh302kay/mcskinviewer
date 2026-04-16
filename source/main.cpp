@@ -21,12 +21,42 @@
 #include "ui.hpp"
 
 #include "colour_shbin.h"
+#include "billboard_shbin.h"
 #include "tex_shbin.h"
 
 #define DISPLAY_TRANSFER_FLAGS \
 	(GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) | \
 	GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGB8) | \
 	GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
+
+float vertices2[] = {
+    // positions         // colors
+    -0.5f, -0.5f, -1.f, 1.0f, 0.0f,   // bottom right
+    +0.5f, -0.5f, -1.f, 0.0f, 0.5f,   // bottom left
+    +0.5f,  +0.5f, -1.f, 0.0f, 0.0f,   // top 
+    -0.5f,  +0.5f, -1.f, 0.5f, 0.5f   // top 
+};    
+
+u8 ebo[] {
+    0, 1, 2,
+    0, 2, 3
+};
+
+static bool loadTex(const std::string& path, C3D_Tex* tex, C3D_TexCube* cube)
+{
+	FILE* fp = fopen(path.c_str(), "rb");
+
+	Tex3DS_Texture t3x = Tex3DS_TextureImportStdio(fp, tex, cube, false);
+	if (!t3x) {
+	    fclose(fp);
+		return false;
+    }
+
+	// Delete the t3x object since we don't need it
+	Tex3DS_TextureFree(t3x);
+	fclose(fp);
+	return true;
+}
 
 int main(int argc, char* argv[]) {
 	romfsInit();
@@ -67,6 +97,26 @@ int main(int argc, char* argv[]) {
 
 	circlePosition cPad;
 
+    void* vbo = linearAlloc(sizeof(vertices2));
+    memcpy(vbo, vertices2, sizeof(vertices2));
+
+    void* eboBuffer = linearAlloc(sizeof(ebo));
+    memcpy(eboBuffer, ebo, sizeof(ebo));
+
+    C3D_Tex steve;
+    loadTex("romfs:/gfx/steve.t3x", &steve, nullptr);
+
+    C3D_AttrInfo attr;
+    AttrInfo_Init(&attr);
+    AttrInfo_AddLoader(&attr, 0, GPU_FLOAT, 3);
+    AttrInfo_AddLoader(&attr, 1, GPU_FLOAT, 2);
+
+    C3D_BufInfo bufInfo;
+	BufInfo_Init(&bufInfo);
+	BufInfo_Add(&bufInfo, vbo, sizeof(float)*5, 2, 0x10);
+
+    Shader billboard((u32*)billboard_shbin, billboard_shbin_size);
+
     while (aptMainLoop())
     {
         hidScanInput();
@@ -98,6 +148,25 @@ int main(int argc, char* argv[]) {
         shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &skinMtx);
         skin.render();
 
+        C3D_Mtx viewProjectionMtx = projection;
+        Mtx_Multiply(&viewProjectionMtx, &viewProjectionMtx, &skinMtx);
+
+        C3D_FVec cameraRight = FVec3_New(viewProjectionMtx.r[0].c[0], viewProjectionMtx.r[1].c[0], viewProjectionMtx.r[2].c[0]);
+        C3D_FVec cameraUp  = FVec3_New(viewProjectionMtx.r[0].c[1], viewProjectionMtx.r[1].c[1], viewProjectionMtx.r[2].c[1]);
+
+        billboard.use();
+
+        billboard.setUniform(GPU_VERTEX_SHADER, "cameraRight_worldspace", cameraRight.x, cameraRight.y, cameraRight.z, cameraRight.w);
+        billboard.setUniform(GPU_VERTEX_SHADER, "cameraUp_worldspace", cameraUp.x, cameraUp.y, cameraUp.z, cameraUp.w);
+
+        billboard.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
+        billboard.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
+        billboard.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &skinMtx);
+        C3D_TexBind(0, &steve);
+        C3D_SetAttrInfo(&attr);
+        C3D_SetBufInfo(&bufInfo);
+        C3D_DrawElements(GPU_TRIANGLES, 6, C3D_UNSIGNED_BYTE, eboBuffer);
+
         C3D_RenderTargetClear(bottom, C3D_CLEAR_ALL, C2D_Color32(1, 199, 199, 255), 0);
 		C3D_FrameDrawOn(bottom);
 		C2D_SceneTarget(bottom);
@@ -108,6 +177,8 @@ int main(int argc, char* argv[]) {
 
 		C3D_FrameEnd(0);
     }
+    linearFree(eboBuffer);
+    linearFree(vbo);
     skin.cleanup();
     socExit();
     free(soc_sharedmem);
