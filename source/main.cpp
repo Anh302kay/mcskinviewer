@@ -20,6 +20,7 @@
 #include "glbloader.hpp"
 #include "ui.hpp"
 
+#include "characters.hpp"
 #include "colour_shbin.h"
 #include "billboard_shbin.h"
 #include "tex_shbin.h"
@@ -31,10 +32,10 @@
 
 float vertices2[] = {
     // positions         // colors
-    -0.5f, -0.5f, -1.f, 1.0f, 0.0f,   // bottom right
-    +0.5f, -0.5f, -1.f, 0.0f, 0.5f,   // bottom left
-    +0.5f,  +0.5f, -1.f, 0.0f, 0.0f,   // top 
-    -0.5f,  +0.5f, -1.f, 0.5f, 0.5f   // top 
+    -0.5f, -0.5f, -1.f, 0.0f, 0.0f,   // bottom left
+    +0.5f, -0.5f, -1.f, 1.0f, 0.0f,   // bottom right
+    +0.5f,  +0.5f, -1.f, 1.0f, 1.0f,   // top right
+    -0.5f,  +0.5f, -1.f, 0.0f, 1.0f   // top left
 };    
 
 u8 ebo[] {
@@ -56,6 +57,20 @@ static bool loadTex(const std::string& path, C3D_Tex* tex, C3D_TexCube* cube)
 	Tex3DS_TextureFree(t3x);
 	fclose(fp);
 	return true;
+}
+
+static constexpr size_t posToTex(u16 index, int width) 
+{
+    // constexpr int width = 8;
+    const int x = index % width;
+    const int y = index / width;
+
+    return ((((y >> 3) * (width >> 3) + (x >> 3)) << 6) + ((x & 1) | ((y & 1) << 1) | ((x & 2) << 1) | ((y & 2) << 2) | ((x & 4) << 2) | ((y & 4) << 3)));
+}
+
+static inline size_t posToTex(unsigned int x, unsigned int y, int width) 
+{
+    return ((((y >> 3) * (width >> 3) + (x >> 3)) << 6) + ((x & 1) | ((y & 1) << 1) | ((x & 2) << 1) | ((y & 2) << 2) | ((x & 4) << 2) | ((y & 4) << 3)));
 }
 
 int main(int argc, char* argv[]) {
@@ -104,7 +119,31 @@ int main(int argc, char* argv[]) {
     memcpy(eboBuffer, ebo, sizeof(ebo));
 
     C3D_Tex steve;
-    loadTex("romfs:/gfx/steve.t3x", &steve, nullptr);
+    // loadTex("romfs:/gfx/steve.t3x", &steve, nullptr);
+    C3D_TexInit(&steve, 256,8, GPU_LA4);
+    memset(steve.data, 0b00001111, steve.size);
+    for(auto [index, text] : std::views::enumerate(skin.name)) {
+        const int value = text;
+        int convertedIndex;
+        if(value < 58)
+            convertedIndex = value - 46;
+        else if (value < 91)
+            convertedIndex = value - 54;
+        else if (value == 95)
+            convertedIndex = 0;
+        else if (value < 123) {
+            convertedIndex = value - 60;
+        }
+        for(int y = 0; y < 8; y++) {
+            for(int x = 0; x < 8; x++)
+            ((u8*)steve.data)[posToTex( x + index*8, y, steve.width)] = textPixels[(convertedIndex*64)+y*8+x];
+        }
+    }
+    // for(int i = 0; i < steve.size; i++) {
+    //     ((u8*)steve.data)[posToTex(i, 8)] = textPixels[i+128];
+    // }
+    C3D_TexSetFilter(&steve, GPU_NEAREST, GPU_NEAREST);
+	C3D_TexSetWrap(&steve, GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
 
     C3D_AttrInfo attr;
     AttrInfo_Init(&attr);
@@ -148,20 +187,22 @@ int main(int argc, char* argv[]) {
         shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &skinMtx);
         skin.render();
 
-        C3D_Mtx viewProjectionMtx = projection;
-        Mtx_Multiply(&viewProjectionMtx, &viewProjectionMtx, &skinMtx);
+        C3D_Mtx ViewProjectionMatrix;
+        Mtx_Multiply(&ViewProjectionMatrix, &projection, &lookAt);
 
-        C3D_FVec cameraRight = FVec3_New(viewProjectionMtx.r[0].c[0], viewProjectionMtx.r[1].c[0], viewProjectionMtx.r[2].c[0]);
-        C3D_FVec cameraUp  = FVec3_New(viewProjectionMtx.r[0].c[1], viewProjectionMtx.r[1].c[1], viewProjectionMtx.r[2].c[1]);
+        C3D_FVec cameraRight = FVec3_New(lookAt.r[0].c[0], lookAt.r[0].c[1], lookAt.r[0].c[2]);
+        C3D_FVec cameraUp  = FVec3_New(lookAt.r[1].c[0], lookAt.r[1].c[1], lookAt.r[1].c[2]);
 
-        billboard.use();
 
-        billboard.setUniform(GPU_VERTEX_SHADER, "cameraRight_worldspace", cameraRight.x, cameraRight.y, cameraRight.z, cameraRight.w);
-        billboard.setUniform(GPU_VERTEX_SHADER, "cameraUp_worldspace", cameraUp.x, cameraUp.y, cameraUp.z, cameraUp.w);
+        C3D_FVec billboardPos = FVec3_New(0, 0.f, -1.5f);
+        // billboard.use();
 
-        billboard.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
-        billboard.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
-        billboard.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &skinMtx);
+        // billboard.setUniform(GPU_VERTEX_SHADER, "cameraRight", cameraRight.x, cameraRight.y, cameraRight.z, 1.f);
+        // billboard.setUniform(GPU_VERTEX_SHADER, "cameraUp", cameraUp.x, cameraUp.y, cameraUp.z, 1.f);
+        // billboard.setUniform(GPU_VERTEX_SHADER, "pos", billboardPos.x, billboardPos.y, billboardPos.z, billboardPos.w);
+        
+        // billboard.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
+        // billboard.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
         C3D_TexBind(0, &steve);
         C3D_SetAttrInfo(&attr);
         C3D_SetBufInfo(&bufInfo);
@@ -177,6 +218,7 @@ int main(int argc, char* argv[]) {
 
 		C3D_FrameEnd(0);
     }
+    C3D_TexDelete(&steve);
     linearFree(eboBuffer);
     linearFree(vbo);
     skin.cleanup();
