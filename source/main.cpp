@@ -20,7 +20,7 @@
 #include "glbloader.hpp"
 #include "ui.hpp"
 
-#include "characters.hpp"
+#include "nameplate.hpp"
 #include "colour_shbin.h"
 #include "billboard_shbin.h"
 #include "tex_shbin.h"
@@ -29,25 +29,6 @@
 	(GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) | \
 	GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGB8) | \
 	GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
-
-float vertices2[] = {
-    // positions         // colors
-    -5.f, -0.5f, -1.f, 0.0f, 0.0f,   // bottom left
-    +5.f, -0.5f, -1.f, 1.0f, 0.0f,   // bottom right
-    +5.f,  +0.5f, -1.f, 1.0f, 1.0f,   // top right
-    -5.f,  +0.5f, -1.f, 0.0f, 1.0f   // top left
-};    
-
-u8 ebo[] {
-    0, 1, 2,
-    0, 2, 3
-};
-
-static constexpr size_t posToTex(unsigned int x, unsigned int y) 
-{
-    constexpr int width = 128;
-    return ((((y >> 3) * (width >> 3) + (x >> 3)) << 6) + ((x & 1) | ((y & 1) << 1) | ((x & 2) << 1) | ((y & 2) << 2) | ((x & 4) << 2) | ((y & 4) << 3)));
-}
 
 int main(int argc, char* argv[]) {
 	romfsInit();
@@ -88,39 +69,7 @@ int main(int argc, char* argv[]) {
 
 	circlePosition cPad;
 
-    void* vbo = linearAlloc(sizeof(vertices2));
-    memcpy(vbo, vertices2, sizeof(vertices2));
-
-    void* eboBuffer = linearAlloc(sizeof(ebo));
-    memcpy(eboBuffer, ebo, sizeof(ebo));
-
-    C3D_Tex steve;
-    C3D_TexInit(&steve, 128,8, GPU_LA4);
-    memset(steve.data, 0b00000000, steve.size);
-    for(auto [index, text] : std::views::enumerate(skin.name)) {
-        const int value = text;
-        int convertedIndex = 0;
-        if      (value < 58) convertedIndex = value - 46;
-        else if (value < 91) convertedIndex = value - 54;
-        else if (value == 95) convertedIndex = 0;
-        else if (value < 123) convertedIndex = value - 60;
-        
-        for(int y = 0; y < 8; y++) {
-            for(int x = 0; x < 6; x++)
-            ((u8*)steve.data)[posToTex( x + index*6, y)] = textPixels[(convertedIndex*48)+y*6+x];
-        }
-    }
-    C3D_TexSetFilter(&steve, GPU_NEAREST, GPU_NEAREST);
-	C3D_TexSetWrap(&steve, GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
-
-    C3D_AttrInfo attr;
-    AttrInfo_Init(&attr);
-    AttrInfo_AddLoader(&attr, 0, GPU_FLOAT, 3);
-    AttrInfo_AddLoader(&attr, 1, GPU_FLOAT, 2);
-
-    C3D_BufInfo bufInfo;
-	BufInfo_Init(&bufInfo);
-	BufInfo_Add(&bufInfo, vbo, sizeof(float)*5, 2, 0x10);
+    Nameplate nameplate(skin.name);
 
     Shader billboard((u32*)billboard_shbin, billboard_shbin_size);
 
@@ -134,7 +83,7 @@ int main(int argc, char* argv[]) {
             break;
 
         camera.update();
-		ui->update(skin, skinTransform, camera);
+		ui->update(skin, nameplate, skinTransform, camera);
         
         if(camera.viewLock && camera.deadZoneX())
 		    skinTransform.rotation.y -= cPad.dx / 96.f;
@@ -161,8 +110,10 @@ int main(int argc, char* argv[]) {
         C3D_FVec cameraRight = FVec3_New(lookAt.r[0].c[0], lookAt.r[0].c[1], lookAt.r[0].c[2]);
         C3D_FVec cameraUp  = FVec3_New(lookAt.r[1].c[0], lookAt.r[1].c[1], lookAt.r[1].c[2]);
 
-
-        C3D_FVec billboardPos = FVec3_New(0, 0.f, -1.5f);
+        Transform billboard(v3f(0,1, -0.75), v3f(0.f), v3f(.25f));
+        billboard.pos.x += nameplate.offset * billboard.scale.x;
+        const C3D_Mtx billboardMtx = billboard.toMtx();
+        shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &billboardMtx);
         // billboard.use();
 
         // billboard.setUniform(GPU_VERTEX_SHADER, "cameraRight", cameraRight.x, cameraRight.y, cameraRight.z, 1.f);
@@ -171,10 +122,7 @@ int main(int argc, char* argv[]) {
         
         // billboard.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
         // billboard.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
-        C3D_TexBind(0, &steve);
-        C3D_SetAttrInfo(&attr);
-        C3D_SetBufInfo(&bufInfo);
-        C3D_DrawElements(GPU_TRIANGLES, 6, C3D_UNSIGNED_BYTE, eboBuffer);
+        nameplate.render();
 
         C3D_RenderTargetClear(bottom, C3D_CLEAR_ALL, C2D_Color32(1, 199, 199, 255), 0);
 		C3D_FrameDrawOn(bottom);
@@ -186,9 +134,6 @@ int main(int argc, char* argv[]) {
 
 		C3D_FrameEnd(0);
     }
-    C3D_TexDelete(&steve);
-    linearFree(eboBuffer);
-    linearFree(vbo);
     skin.cleanup();
     socExit();
     free(soc_sharedmem);

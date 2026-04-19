@@ -5,6 +5,7 @@
 #include <citro2d.h>
 
 #include "skin.hpp"
+#include "nameplate.hpp"
 #include "camera.hpp"
 #include "utils.hpp"
 struct button {
@@ -76,10 +77,10 @@ class UI {
 public:
     UI();
     ~UI();
-    void update(Skin& skin, Transform& skinTransform, Camera& camera);
+    void update(Skin& skin, Nameplate& nameplate, Transform& skinTransform, Camera& camera);
     void draw(Skin& skin);
 private:
-    void keyboardInput(Skin& skin);
+    void keyboardInput(Skin& skin, Nameplate& nameplate);
     void cameraUpdate(Camera& camera, Transform& skinTransform);
     void visUpdate(Skin& skin);
     u8 mode = MENU_KEYBOARD;

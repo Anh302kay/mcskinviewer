@@ -110,7 +110,7 @@ UI::~UI() {
         img.tex = nullptr;
 }
 
-void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
+void UI::update(Skin& skin, Nameplate& nameplate, Transform& skinTransform, Camera& camera) {
     const u32 kDown = hidKeysDown();
     const u32 kHeld = hidKeysHeld();
     hidTouchRead(&touch);
@@ -140,7 +140,7 @@ void UI::update(Skin& skin, Transform& skinTransform, Camera& camera) {
     switch (mode) {
     case MENU_KEYBOARD:
         if(kDown & KEY_TOUCH)
-            keyboardInput(skin);
+            keyboardInput(skin, nameplate);
         break;
     case MENU_VISIBILITY:
         visUpdate(skin);
@@ -193,7 +193,7 @@ void UI::draw(Skin& skin) {
     }
 }
 
-void UI::keyboardInput(Skin& skin) {
+void UI::keyboardInput(Skin& skin, Nameplate& nameplate) {
     static std::string cache;
     cache.reserve(20);
     constexpr u16 keyboardOffset = 55;
@@ -219,6 +219,7 @@ void UI::keyboardInput(Skin& skin) {
     constexpr rectI enter(288, 122, 29, 44);
     if(touchedBox(touch, enter) || (kDown & KEY_A)) {
         skin.download(cache);
+        nameplate.update(cache);
         switch(skin.type) {
             case SKIN_CLASSIC:
                 setSkinControls(visButtons, 145, 30, 2);
