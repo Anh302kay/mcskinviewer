@@ -32,10 +32,10 @@
 
 float vertices2[] = {
     // positions         // colors
-    -0.5f, -0.5f, -1.f, 0.0f, 0.0f,   // bottom left
-    +0.5f, -0.5f, -1.f, 1.0f, 0.0f,   // bottom right
-    +0.5f,  +0.5f, -1.f, 1.0f, 1.0f,   // top right
-    -0.5f,  +0.5f, -1.f, 0.0f, 1.0f   // top left
+    -5.f, -0.5f, -1.f, 0.0f, 0.0f,   // bottom left
+    +5.f, -0.5f, -1.f, 1.0f, 0.0f,   // bottom right
+    +5.f,  +0.5f, -1.f, 1.0f, 1.0f,   // top right
+    -5.f,  +0.5f, -1.f, 0.0f, 1.0f   // top left
 };    
 
 u8 ebo[] {
@@ -43,33 +43,9 @@ u8 ebo[] {
     0, 2, 3
 };
 
-static bool loadTex(const std::string& path, C3D_Tex* tex, C3D_TexCube* cube)
+static constexpr size_t posToTex(unsigned int x, unsigned int y) 
 {
-	FILE* fp = fopen(path.c_str(), "rb");
-
-	Tex3DS_Texture t3x = Tex3DS_TextureImportStdio(fp, tex, cube, false);
-	if (!t3x) {
-	    fclose(fp);
-		return false;
-    }
-
-	// Delete the t3x object since we don't need it
-	Tex3DS_TextureFree(t3x);
-	fclose(fp);
-	return true;
-}
-
-static constexpr size_t posToTex(u16 index, int width) 
-{
-    // constexpr int width = 8;
-    const int x = index % width;
-    const int y = index / width;
-
-    return ((((y >> 3) * (width >> 3) + (x >> 3)) << 6) + ((x & 1) | ((y & 1) << 1) | ((x & 2) << 1) | ((y & 2) << 2) | ((x & 4) << 2) | ((y & 4) << 3)));
-}
-
-static inline size_t posToTex(unsigned int x, unsigned int y, int width) 
-{
+    constexpr int width = 128;
     return ((((y >> 3) * (width >> 3) + (x >> 3)) << 6) + ((x & 1) | ((y & 1) << 1) | ((x & 2) << 1) | ((y & 2) << 2) | ((x & 4) << 2) | ((y & 4) << 3)));
 }
 
@@ -107,7 +83,7 @@ int main(int argc, char* argv[]) {
 
     Skin skin;
     skin.initModels();
-    skin.download("Bob_Gangster");
+    skin.download("Bob_gangster");
     Transform skinTransform (v3f(0,-1.25, -1), v3f(0.f), v3f(1.f));
 
 	circlePosition cPad;
@@ -119,29 +95,21 @@ int main(int argc, char* argv[]) {
     memcpy(eboBuffer, ebo, sizeof(ebo));
 
     C3D_Tex steve;
-    // loadTex("romfs:/gfx/steve.t3x", &steve, nullptr);
-    C3D_TexInit(&steve, 256,8, GPU_LA4);
-    memset(steve.data, 0b00001111, steve.size);
+    C3D_TexInit(&steve, 128,8, GPU_LA4);
+    memset(steve.data, 0b00000000, steve.size);
     for(auto [index, text] : std::views::enumerate(skin.name)) {
         const int value = text;
-        int convertedIndex;
-        if(value < 58)
-            convertedIndex = value - 46;
-        else if (value < 91)
-            convertedIndex = value - 54;
-        else if (value == 95)
-            convertedIndex = 0;
-        else if (value < 123) {
-            convertedIndex = value - 60;
-        }
+        int convertedIndex = 0;
+        if      (value < 58) convertedIndex = value - 46;
+        else if (value < 91) convertedIndex = value - 54;
+        else if (value == 95) convertedIndex = 0;
+        else if (value < 123) convertedIndex = value - 60;
+        
         for(int y = 0; y < 8; y++) {
-            for(int x = 0; x < 8; x++)
-            ((u8*)steve.data)[posToTex( x + index*8, y, steve.width)] = textPixels[(convertedIndex*64)+y*8+x];
+            for(int x = 0; x < 6; x++)
+            ((u8*)steve.data)[posToTex( x + index*6, y)] = textPixels[(convertedIndex*48)+y*6+x];
         }
     }
-    // for(int i = 0; i < steve.size; i++) {
-    //     ((u8*)steve.data)[posToTex(i, 8)] = textPixels[i+128];
-    // }
     C3D_TexSetFilter(&steve, GPU_NEAREST, GPU_NEAREST);
 	C3D_TexSetWrap(&steve, GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
 
