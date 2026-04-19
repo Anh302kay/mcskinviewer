@@ -80,9 +80,9 @@ UI::UI() {
     skinTextbuf = C2D_TextBufNew(128);
     font = C2D_FontLoad("romfs:/gfx/Minecraft.bcfnt");
 
-    menuButtons[MENU_KEYBOARD] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 1), {65, 215}, {27,27}, C2D_Color32(255,255,255,255), 0.f, v2f(1.f), v2f(1.f));
-    menuButtons[MENU_VISIBILITY] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 0), {95, 215}, {27,27}, C2D_Color32(255,255,255,255), 0.f, v2f(1.f), v2f(1.f));
-    menuButtons[MENU_CAMERA] = button({125, 215}, {27,27}, C2D_Color32(255,255,255,255), 20.f, v2f(1.f), v2f(1.f));
+    menuButtons[MENU_KEYBOARD] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 1), {116, 215}, {27,27}, C2D_Color32(255,255,255,255), 0.f, v2f(1.f), v2f(1.f));
+    menuButtons[MENU_VISIBILITY] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 0), {146, 215}, {27,27}, C2D_Color32(255,255,255,255), 0.f, v2f(1.f), v2f(1.f));
+    menuButtons[MENU_CAMERA] = button(C2D_SpriteSheetGetImage(iconSpritesheet, 2), {176, 215}, {27,27}, C2D_Color32(255,255,255,255), 0.f, v2f(1.f), v2f(0,-2));
 
     cameraButtons[CAMERA_TRACKPAD] = button(v2f(20.f, 10.f), v2f(280.f, 193.f));
 
@@ -156,7 +156,7 @@ void UI::update(Skin& skin, Nameplate& nameplate, Transform& skinTransform, Came
 void UI::draw(Skin& skin) {
     constexpr u32 white = C2D_Color32(255,255,255,255);
     constexpr u32 grey = C2D_Color32(128,128,128,255);
-    C2D_DrawRectSolid(60, 213, 0, 202, 27, C2D_Color32(0,0,0,255));
+    C2D_DrawRectSolid(113.5, 213, 0, 93, 27, C2D_Color32(0,0,0,255));
     // C2D_DrawText(&debugText, 0, 50, 30, 0, .5f, .5f);
     for(button& b : menuButtons)
         b.draw();

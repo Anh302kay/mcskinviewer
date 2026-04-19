@@ -122,7 +122,9 @@ int main(int argc, char* argv[]) {
         
         // billboard.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
         // billboard.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
+        C3D_DepthTest(true, GPU_ALWAYS, GPU_WRITE_ALL);
         nameplate.render();
+        C3D_DepthTest(false, GPU_ALWAYS, GPU_WRITE_ALL);
 
         C3D_RenderTargetClear(bottom, C3D_CLEAR_ALL, C2D_Color32(1, 199, 199, 255), 0);
 		C3D_FrameDrawOn(bottom);
