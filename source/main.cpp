@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
 
     Nameplate nameplate(skin.name);
 
-    Shader billboard((u32*)billboard_shbin, billboard_shbin_size);
+    Shader billboardShader((u32*)billboard_shbin, billboard_shbin_size);
 
     while (aptMainLoop())
     {
@@ -114,14 +114,14 @@ int main(int argc, char* argv[]) {
         billboard.pos.x += nameplate.offset * billboard.scale.x;
         const C3D_Mtx billboardMtx = billboard.toMtx();
         shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &billboardMtx);
-        // billboard.use();
+        // billboardShader.use();
 
-        // billboard.setUniform(GPU_VERTEX_SHADER, "cameraRight", cameraRight.x, cameraRight.y, cameraRight.z, 1.f);
-        // billboard.setUniform(GPU_VERTEX_SHADER, "cameraUp", cameraUp.x, cameraUp.y, cameraUp.z, 1.f);
-        // billboard.setUniform(GPU_VERTEX_SHADER, "pos", billboardPos.x, billboardPos.y, billboardPos.z, billboardPos.w);
+        // billboardShader.setUniform(GPU_VERTEX_SHADER, "cameraRight", cameraRight.x, cameraRight.y, cameraRight.z, 1.f);
+        // billboardShader.setUniform(GPU_VERTEX_SHADER, "cameraUp", cameraUp.x, cameraUp.y, cameraUp.z, 1.f);
+        // billboardShader.setUniform(GPU_VERTEX_SHADER, "pos", billboard.pos.x, billboard.pos.y, billboard.pos.z, 1.f);
         
-        // billboard.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
-        // billboard.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
+        // billboardShader.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
+        // billboardShader.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
         C3D_DepthTest(true, GPU_ALWAYS, GPU_WRITE_ALL);
         nameplate.render();
         C3D_DepthTest(false, GPU_ALWAYS, GPU_WRITE_ALL);

@@ -71,7 +71,7 @@ void Nameplate::update(const std::string& name) {
     for(auto [index, text] : std::views::enumerate(name)) {
         const int value = text;
         int convertedIndex = 0;
-        if      (value < 58) convertedIndex = value - 46;
+        if      (value < 58) convertedIndex = value - 47;
         else if (value < 91) convertedIndex = value - 54;
         else if (value == 95) convertedIndex = 0;
         else if (value < 123) convertedIndex = value - 60;
