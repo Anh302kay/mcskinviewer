@@ -33,6 +33,7 @@
 int main(int argc, char* argv[]) {
 	romfsInit();
     gfxInitDefault();
+    gfxSet3D(true);
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
     C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
     // consoleInit(GFX_BOTTOM, NULL);
@@ -41,8 +42,11 @@ int main(int argc, char* argv[]) {
     soc_sharedmem = (u32*)memalign(0x1000, 0x100000);
     socInit(soc_sharedmem, 0x100000);
 
-    C3D_RenderTarget* top = C3D_RenderTargetCreate(240, 400, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
-    C3D_RenderTargetSetOutput(top, GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
+    C3D_RenderTarget* left = C3D_RenderTargetCreate(240, 400, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
+    C3D_RenderTargetSetOutput(left, GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
+
+    C3D_RenderTarget* right = C3D_RenderTargetCreate(240, 400, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
+    C3D_RenderTargetSetOutput(right, GFX_TOP, GFX_RIGHT, DISPLAY_TRANSFER_FLAGS);
 
 	C3D_RenderTarget* bottom = C3D_RenderTargetCreate(240, 320, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
     C3D_RenderTargetSetOutput(bottom, GFX_BOTTOM, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
@@ -73,14 +77,16 @@ int main(int argc, char* argv[]) {
 
     Shader billboardShader((u32*)billboard_shbin, billboard_shbin_size);
 
-    while (aptMainLoop())
-    {
+    while (aptMainLoop()) {
         hidScanInput();
 		hidCircleRead(&cPad);
 
         const u32 kDown = hidKeysDown();
         if(kDown & KEY_START)
             break;
+
+        const float slider = osGet3DSliderState();
+        const float iod = slider/3.f;
 
         camera.update();
 		ui->update(skin, nameplate, skinTransform, camera);
@@ -89,11 +95,12 @@ int main(int argc, char* argv[]) {
 		    skinTransform.rotation.y -= cPad.dx / 96.f;
 
         const C3D_Mtx lookAt = camera.getLookAt();
-        const C3D_Mtx projection = camera.projection;
+        C3D_Mtx projection;
+        Mtx_PerspStereoTilt(&projection, C3D_AngleFromDegrees(90), C3D_AspectRatioTop, 0.01f, 1000.f, -iod, 1.f, false);
 
         C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-        C3D_RenderTargetClear(top, C3D_CLEAR_ALL, C2D_Color32(1, 128, 199, 255), 0);
-        C3D_FrameDrawOn(top);
+        C3D_RenderTargetClear(left, C3D_CLEAR_ALL, C2D_Color32(1, 128, 199, 255), 0);
+        C3D_FrameDrawOn(left);
 
 		shader.use();
 		C3D_SetTexEnv(0, &env);
@@ -104,27 +111,51 @@ int main(int argc, char* argv[]) {
         shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &skinMtx);
         skin.render();
 
-        C3D_Mtx ViewProjectionMatrix;
-        Mtx_Multiply(&ViewProjectionMatrix, &projection, &lookAt);
+        // C3D_Mtx ViewProjectionMatrix;
+        // Mtx_Multiply(&ViewProjectionMatrix, &projection, &lookAt);
 
-        C3D_FVec cameraRight = FVec3_New(lookAt.r[0].c[0], lookAt.r[0].c[1], lookAt.r[0].c[2]);
-        C3D_FVec cameraUp  = FVec3_New(lookAt.r[1].c[0], lookAt.r[1].c[1], lookAt.r[1].c[2]);
+        // C3D_FVec cameraRight = FVec3_New(lookAt.r[0].c[0], lookAt.r[0].c[1], lookAt.r[0].c[2]);
+        // C3D_FVec cameraUp  = FVec3_New(lookAt.r[1].c[0], lookAt.r[1].c[1], lookAt.r[1].c[2]);
 
+        // cameraRight = FVec3_Normalize(cameraRight);
+        // cameraUp    = FVec3_Normalize(cameraUp);
         Transform billboard(v3f(0,1, -0.75), v3f(0.f), v3f(.25f));
         billboard.pos.x += nameplate.offset * billboard.scale.x;
         const C3D_Mtx billboardMtx = billboard.toMtx();
         shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &billboardMtx);
         // billboardShader.use();
+        // billboardShader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &billboardMtx);
 
-        // billboardShader.setUniform(GPU_VERTEX_SHADER, "cameraRight", cameraRight.x, cameraRight.y, cameraRight.z, 1.f);
-        // billboardShader.setUniform(GPU_VERTEX_SHADER, "cameraUp", cameraUp.x, cameraUp.y, cameraUp.z, 1.f);
-        // billboardShader.setUniform(GPU_VERTEX_SHADER, "pos", billboard.pos.x, billboard.pos.y, billboard.pos.z, 1.f);
+        // billboardShader.setUniform(GPU_VERTEX_SHADER, "cameraRight", cameraRight.x, cameraRight.y, cameraRight.z, 0.f);
+        // billboardShader.setUniform(GPU_VERTEX_SHADER, "cameraUp", cameraUp.x, cameraUp.y, cameraUp.z, 0.f);
+        // billboardShader.setUniform(GPU_VERTEX_SHADER, "pos", billboard.pos.x, billboard.pos.y, billboard.pos.z, 0.f);
+        // billboardShader.setUniform(GPU_VERTEX_SHADER, "scale", billboard.scale.x, billboard.scale.y, 0.f, 0.f);
         
         // billboardShader.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
         // billboardShader.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
         C3D_DepthTest(true, GPU_ALWAYS, GPU_WRITE_ALL);
         nameplate.render();
-        C3D_DepthTest(false, GPU_ALWAYS, GPU_WRITE_ALL);
+        C3D_DepthTest(true, GPU_GEQUAL, GPU_WRITE_ALL);
+
+        if(slider > 0) {
+            C3D_RenderTargetClear(right, C3D_CLEAR_ALL, C2D_Color32(1, 199, 199, 255), 0);
+		    C3D_FrameDrawOn(right);
+            Mtx_PerspStereoTilt(&projection, C3D_AngleFromDegrees(90), C3D_AspectRatioTop, 0.01f, 1000.f, iod, 1.f, false);
+
+            shader.use();
+            C3D_SetTexEnv(0, &env);
+            skin.use();
+            const C3D_Mtx skinMtx = skinTransform.toMtx();
+            shader.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
+            shader.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
+            shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &skinMtx);
+            skin.render();
+
+            shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &billboardMtx);
+            C3D_DepthTest(true, GPU_ALWAYS, GPU_WRITE_ALL);
+            nameplate.render();
+            C3D_DepthTest(true, GPU_GEQUAL, GPU_WRITE_ALL);
+        }
 
         C3D_RenderTargetClear(bottom, C3D_CLEAR_ALL, C2D_Color32(1, 199, 199, 255), 0);
 		C3D_FrameDrawOn(bottom);
