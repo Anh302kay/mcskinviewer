@@ -7,10 +7,10 @@
 
 static constexpr float vertices[] = {
     // positions         // uv
-    -5.f, -0.5f, -1.f, 0.0f, 0.0f,   // bottom left
-    +5.f, -0.5f, -1.f, 1.0f, 0.0f,   // bottom right
-    +5.f,  +0.5f, -1.f, 1.0f, 1.0f,   // top right
-    -5.f,  +0.5f, -1.f, 0.0f, 1.0f   // top left
+    -5.f, -0.5f, 0.0f, 0.0f,   // bottom left
+    +5.f, -0.5f, 1.0f, 0.0f,   // bottom right
+    +5.f, +0.5f, 1.0f, 1.0f,   // top right
+    -5.f, +0.5f, 0.0f, 1.0f   // top left
 };    
 
 constexpr int meshSize = sizeof(vertices);
@@ -38,11 +38,11 @@ Nameplate::Nameplate(const std::string& name) {
     memcpy(indices, indicesOrder, sizeof(indicesOrder));
 
     AttrInfo_Init(&attrInfo);
-    AttrInfo_AddLoader(&attrInfo, 0, GPU_FLOAT, 3);
+    AttrInfo_AddLoader(&attrInfo, 0, GPU_FLOAT, 2);
     AttrInfo_AddLoader(&attrInfo, 1, GPU_FLOAT, 2);
 
 	BufInfo_Init(&bufInfo);
-	BufInfo_Add(&bufInfo, meshData, sizeof(float)*5, 2, 0x10);
+	BufInfo_Add(&bufInfo, meshData, sizeof(float)*4, 2, 0x10);
 
     C3D_TexInit(&texture, 128,8, GPU_LA4);
     C3D_TexSetFilter(&texture, GPU_NEAREST, GPU_NEAREST);

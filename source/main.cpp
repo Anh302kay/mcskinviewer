@@ -111,28 +111,31 @@ int main(int argc, char* argv[]) {
         shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &skinMtx);
         skin.render();
 
-        // C3D_Mtx ViewProjectionMatrix;
-        // Mtx_Multiply(&ViewProjectionMatrix, &projection, &lookAt);
+        C3D_Mtx ViewProjectionMatrix;
+        Mtx_Multiply(&ViewProjectionMatrix, &projection, &lookAt);
 
-        // C3D_FVec cameraRight = FVec3_New(lookAt.r[0].c[0], lookAt.r[0].c[1], lookAt.r[0].c[2]);
-        // C3D_FVec cameraUp  = FVec3_New(lookAt.r[1].c[0], lookAt.r[1].c[1], lookAt.r[1].c[2]);
+        C3D_FVec cameraRight = FVec3_New(lookAt.r[0].c[0], lookAt.r[0].c[1], lookAt.r[0].c[2]);
+        C3D_FVec cameraUp  = FVec3_New(lookAt.r[1].c[0], lookAt.r[1].c[1], lookAt.r[1].c[2]);
 
-        // cameraRight = FVec3_Normalize(cameraRight);
-        // cameraUp    = FVec3_Normalize(cameraUp);
+        cameraRight = FVec3_Normalize(cameraRight);
+        cameraUp    = FVec3_Normalize(cameraUp);
         Transform billboard(v3f(0,1, -0.75), v3f(0.f), v3f(.25f));
+        // billboard.rotation.y = 45;
         billboard.pos.x += nameplate.offset * billboard.scale.x;
         const C3D_Mtx billboardMtx = billboard.toMtx();
         shader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &billboardMtx);
-        // billboardShader.use();
+
         // billboardShader.setUniform4x4(GPU_VERTEX_SHADER, "modelView", &billboardMtx);
+        // billboardShader.use();
+
+        // billboardShader.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
+        // billboardShader.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
 
         // billboardShader.setUniform(GPU_VERTEX_SHADER, "cameraRight", cameraRight.x, cameraRight.y, cameraRight.z, 0.f);
         // billboardShader.setUniform(GPU_VERTEX_SHADER, "cameraUp", cameraUp.x, cameraUp.y, cameraUp.z, 0.f);
+
         // billboardShader.setUniform(GPU_VERTEX_SHADER, "pos", billboard.pos.x, billboard.pos.y, billboard.pos.z, 0.f);
         // billboardShader.setUniform(GPU_VERTEX_SHADER, "scale", billboard.scale.x, billboard.scale.y, 0.f, 0.f);
-        
-        // billboardShader.setUniform4x4(GPU_VERTEX_SHADER, "projection", &projection);
-        // billboardShader.setUniform4x4(GPU_VERTEX_SHADER, "view", &lookAt);
         C3D_DepthTest(true, GPU_ALWAYS, GPU_WRITE_ALL);
         nameplate.render();
         C3D_DepthTest(true, GPU_GEQUAL, GPU_WRITE_ALL);
